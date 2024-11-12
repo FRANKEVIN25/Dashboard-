@@ -1,1 +1,22 @@
+import geopandas as gpd
+import pydeck as pdk
+import streamlit as st
+
+gdf = gpd.read_file("peru_regions.shp") 
+
+geojson_data = gdf.to_json()
+
+view_state = pdk.ViewState(latitude=-9.19, longitude=-75.0152, zoom=5, pitch=0)
+
+layer = pdk.Layer(
+    "GeoJsonLayer",
+    data=geojson_data,
+    get_fill_color="[200, 30, 0, 160]",
+    get_line_color=[255, 255, 255],
+)
+
+deck = pdk.Deck(layers=[layer], initial_view_state=view_state)
+st.pydeck_chart(deck)
+df = gdf.drop(columns="geometry")
+st.write(df)
 
