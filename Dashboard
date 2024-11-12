@@ -1,22 +1,72 @@
 import geopandas as gpd
 import pydeck as pdk
 import streamlit as st
+import matplotlib.pyplot as plt
 
-gdf = gpd.read_file("peru_regions.shp") 
+# Datos de ejemplo
+categoria = ["Junin", "Pasco", "Arequipa", "Lima"]
+valores = [0, 1.1, 1.4142, 99]
 
+# Configuración de la página
+st.set_page_config(layout="wide", page_title="Análisis Geoespacial y Gráfico", page_icon="🌎")
+
+# Función para crear gráficos de barras personalizados
+def set_data(ax, categoria, valores, lineas):
+    ax.bar(categoria, valores, color=["#FF6347", "#4682B4", "#FFD700", "#8A2BE2"])  # Colores personalizados
+    ax.set_title(lineas[0], fontsize=14, color="#333333")
+    ax.set_xlabel(lineas[1], fontsize=12, color="#666666")
+    ax.set_ylabel(lineas[2], fontsize=12, color="#666666")
+    ax.grid(True, linestyle="--", alpha=0.7)
+
+# Leer el archivo de regiones de Perú
+gdf = gpd.read_file("peru_regions.shp")
+
+# Conversión de GeoDataFrame a JSON
 geojson_data = gdf.to_json()
 
+# Configuración de la vista inicial del mapa
 view_state = pdk.ViewState(latitude=-9.19, longitude=-75.0152, zoom=5, pitch=0)
 
+# Crear la capa GeoJsonLayer para Pydeck con estilo mejorado
 layer = pdk.Layer(
     "GeoJsonLayer",
     data=geojson_data,
-    get_fill_color="[200, 30, 0, 160]",
-    get_line_color=[255, 255, 255],
+    get_fill_color="[255, 165, 0, 100]",  # Naranja translúcido
+    get_line_color=[0, 0, 0],              # Borde negro
+    line_width_min_pixels=2,
+    pickable=True,
+    auto_highlight=True
 )
 
+# Definir el objeto Deck con la capa y vista configurada
 deck = pdk.Deck(layers=[layer], initial_view_state=view_state)
-st.pydeck_chart(deck)
-df = gdf.drop(columns="geometry")
-st.write(df)
 
+# Estructura de columnas en Streamlit
+c_1, c_2, c_3 = st.columns([4, 8, 4])
+
+# Crear gráficos en las columnas con una presentación mejorada
+st.title("Análisis Geoespacial y Visualización de Datos de Perú 🌍")
+
+with c_1:
+    st.subheader("Gasto Anual por Departamento")
+    fig3, ax3 = plt.subplots()
+    set_data(ax3, categoria, valores, ["Gasto Anual", "Departamentos", "Soles"])
+    st.pyplot(fig3)
+
+with c_2:
+    st.subheader("Mapa de Regiones de Perú")
+    st.pydeck_chart(deck)
+    st.write("Datos de regiones:")
+    df = gdf.drop(columns="geometry")
+    st.write(df)
+
+with c_3:
+    st.subheader("Comparador y Gráficos")
+    fig, ax = plt.subplots()
+    set_data(ax, categoria, valores, ["Comparador", "Departamentos", "Valores"])
+
+    fig2, ax2 = plt.subplots()
+    set_data(ax2, categoria, valores, ["Gráficos de Gastos", "Departamentos", "Gastos Públicos"])
+
+    st.pyplot(fig)
+    st.pyplot(fig2)
