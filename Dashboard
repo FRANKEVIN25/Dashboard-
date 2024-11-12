@@ -1,22 +1,63 @@
-import geopandas as gpd
-import pydeck as pdk
 import streamlit as st
+import folium
+import json
+from folium import GeoJson
+from io import BytesIO
 
-gdf = gpd.read_file("peru_regions.shp") 
+#Cargamos nuestro archivo GeoJson
+with open("peru_departamental_simple.geojson", "r") as f:
+    geojson_data = json.load(f)
 
-geojson_data = gdf.to_json()
+#Colores para cada departamento
+departamento_colores = {
+    "AMAZONAS": "#FF6347",
+    "ANCASH": "#32CD32",
+    "APURIMAC": "#1E90FF",
+    "AREQUIPA": "#FFD700",
+    "AYACUCHO": "#8A2BE2",
+    "CAJAMARCA": "#FF4500",
+    "CALLAO": "#20B2AA",
+    "CUSCO": "#D2691E",
+    "HUANCAVELICA": "#ADFF2F",
+    "HUANUCO": "#FF1493",
+    "ICA": "#B8860B",
+    "JUNIN": "#A52A2A",
+    "LA LIBERTAD": "#A9A9A9",
+    "LAMBAYEQUE": "#7FFF00",
+    "LIMA": "#800000",
+    "LORETO": "#9ACD32",
+    "MADRE DE DIOS": "#4B0082",
+    "MOQUEGUA": "#8B0000",
+    "PASCO": "#2E8B57",
+    "PIURA": "#B0C4DE",
+    "PUNO": "#FF8C00",
+    "SAN MARTIN": "#E0FFFF",
+    "TACNA": "#00CED1",
+    "TUMBES": "#FF00FF",
+    "UCAYALI": "#F08080"
+}
 
-view_state = pdk.ViewState(latitude=-9.19, longitude=-75.0152, zoom=5, pitch=0)
+def create_map():
+    m = folium.Map(location=[-9.19, -75.015], zoom_start=5)
 
-layer = pdk.Layer(
-    "GeoJsonLayer",
-    data=geojson_data,
-    get_fill_color="[200, 30, 0, 160]",
-    get_line_color=[255, 255, 255],
-)
+    folium.GeoJson(
+        geojson_data,
+        style_function=lambda feature: {
+            'fillColor': departamento_colores.get(feature['properties']['NOMBDEP'], "#808080"),  # Color por defecto si no está en el diccionario
+            'weight': 2,
+            'opacity': 1,
+            'color': 'black',
+            'fillOpacity': 0.7
+        }
+    ).add_to(m)
 
-deck = pdk.Deck(layers=[layer], initial_view_state=view_state)
-st.pydeck_chart(deck)
-df = gdf.drop(columns="geometry")
-st.write(df)
+    # Guardar el mapa en un archivo HTML temporal
+    map_html = BytesIO()
+    m.save(map_html, close_file=False)
+    map_html.seek(0)
+
+    return map_html
+
+map_html = create_map()
+st.components.v1.html(map_html.getvalue(), height=600)
 
