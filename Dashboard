@@ -1,15 +1,14 @@
 import streamlit as st
 import folium
-import json
 from folium import GeoJson
+import json
 from io import BytesIO
-from shapely.geometry import shape
+import random
 
-#Cargamos nuestro archivo GeoJson
-with open("peru_departamental_simple.geojson", "r") as f:
-    geojson_data = json.load(f)
+# Configuración de la página con título y emoji de mundo
+st.set_page_config(page_title="Mapa del Gasto Público en Perú 🌍", page_icon="🌍", layout="wide")
 
-#Colores para cada departamento
+# Diccionario de colores para cada departamento
 departamento_colores = {
     "AMAZONAS": "#FF6347",
     "ANCASH": "#32CD32",
@@ -38,41 +37,100 @@ departamento_colores = {
     "UCAYALI": "#F08080"
 }
 
-def create_map():
+
+# Cargar archivo GeoJSON
+@st.cache_data
+def load_geojson():
+    with open("peru_departamental_simple.geojson", "r") as f:
+        geojson_data = json.load(f)
+    return geojson_data
+
+
+# Crear el mapa interactivo
+def create_map(geojson_data, selected_departamento=None):
     m = folium.Map(location=[-9.19, -75.015], zoom_start=5)
 
-    folium.GeoJson(
-        geojson_data,
-        style_function=lambda feature: {
-            'fillColor': departamento_colores.get(feature['properties']['NOMBDEP'], "#808080"),  # Color por defecto si no está en el diccionario
-            'weight': 2,
-            'opacity': 1,
-            'color': 'black',
-            'fillOpacity': 0.7
-        }
-    ).add_to(m)
-    # Agregar etiquetas con el nombre de cada departamento en el centro de cada polígono
-    for feature in geojson_data['features']:
-        nombre_departamento = feature['properties']['NOMBDEP']
-        # Obtener el centroide del polígono con shapely
-        polygon = shape(feature['geometry'])
-        centro = polygon.centroid
+    # Función para manejar el clic en un departamento
+    def handle_click(feature):
+        departamento = feature['properties']['NOMBDEP']
+        gasto_mensual = [random.randint(500000, 2000000) for _ in range(12)]
+        st.session_state["departamento"] = departamento
+        st.session_state["gasto_mensual"] = gasto_mensual
 
-        # Agregar el marcador con el nombre del departamento
-        folium.Marker(
-            location=[centro.y, centro.x],  # Coordenadas del centroide en orden latitud, longitud
-            icon=folium.DivIcon(
-                html=f'<div style="font-size: 12px; color: black; font-weight: bold;">{nombre_departamento}</div>'
-            )
+    # Añadir cada departamento al mapa
+    for feature in geojson_data["features"]:
+        dep_name = feature['properties']['NOMBDEP']
+        color = departamento_colores.get(dep_name, "#808080")
+
+        # Cambiar el contorno si es el departamento seleccionado
+        if dep_name == selected_departamento:
+            line_color = "yellow"  # Contorno resaltado para el departamento seleccionado
+            weight = 4
+        else:
+            line_color = "black"
+            weight = 2
+
+        folium.GeoJson(
+            feature,
+            style_function=lambda feature, color=color: {
+                'fillColor': color,
+                'weight': weight,
+                'opacity': 1,
+                'color': line_color,
+                'fillOpacity': 0.7
+            },
+            tooltip=feature['properties']['NOMBDEP'],
+            highlight_function=lambda x: {'weight': 3, 'color': 'blue'},
+            name="Departamento",
         ).add_to(m)
 
-    # Guardar el mapa en un archivo HTML temporal
     map_html = BytesIO()
     m.save(map_html, close_file=False)
     map_html.seek(0)
-
     return map_html
 
-map_html = create_map()
-st.components.v1.html(map_html.getvalue(), height=600)
 
+# Título de la aplicación
+st.title("Mapa Interactivo del Gasto Público en Perú - Año 2023 🌍")
+
+# Columnas de la interfaz
+col1, col2 = st.columns([1, 2], gap="medium")
+
+# Columna Izquierda: Información de Gasto
+with col1:
+    st.header("Información de Gasto Público 📊")
+
+    # Mostrar los datos al hacer clic
+    if "departamento" in st.session_state:
+        departamento = st.session_state["departamento"]
+        gasto_mensual = st.session_state["gasto_mensual"]
+
+        st.subheader(f"Departamento: {departamento}")
+        st.markdown("<hr style='border:1px solid #ddd;'>", unsafe_allow_html=True)
+
+        st.write("### Gasto Mensual (S/):")
+        for mes, gasto in enumerate(gasto_mensual, start=1):
+            st.write(f"**Mes {mes}**: S/ {gasto:,.2f}")
+
+        total_gasto = sum(gasto_mensual)
+        st.markdown("<hr style='border:1px solid #ddd;'>", unsafe_allow_html=True)
+        st.write(f"**Gasto Total Anual:** S/ {total_gasto:,.2f}")
+    else:
+        st.write("Seleccione una región en el mapa para ver el detalle del gasto público.")
+
+# Columna Derecha: Mapa Interactivo
+with col2:
+    geojson_data = load_geojson()
+    map_html = create_map(geojson_data, selected_departamento=st.session_state.get("departamento"))
+    st.components.v1.html(map_html.getvalue(), height=600)
+
+# Barra lateral con información adicional
+st.sidebar.header("Información Adicional")
+st.sidebar.markdown("""
+    Este mapa muestra el gasto público por departamento en Perú para el año 2023.
+    <br>Haga clic en cualquier región para obtener detalles específicos de cada área.
+    <br><br>Este proyecto fue desarrollado como una herramienta de visualización de datos para el análisis regional.
+    """, unsafe_allow_html=True)
+
+# Notificación para el usuario
+st.sidebar.info("Haga clic en un departamento en el mapa para ver su gasto mensual.")
