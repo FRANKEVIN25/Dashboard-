@@ -3,6 +3,7 @@ import folium
 import json
 from folium import GeoJson
 from io import BytesIO
+from shapely.geometry import shape
 
 #Cargamos nuestro archivo GeoJson
 with open("peru_departamental_simple.geojson", "r") as f:
@@ -50,6 +51,20 @@ def create_map():
             'fillOpacity': 0.7
         }
     ).add_to(m)
+    # Agregar etiquetas con el nombre de cada departamento en el centro de cada polígono
+    for feature in geojson_data['features']:
+        nombre_departamento = feature['properties']['NOMBDEP']
+        # Obtener el centroide del polígono con shapely
+        polygon = shape(feature['geometry'])
+        centro = polygon.centroid
+
+        # Agregar el marcador con el nombre del departamento
+        folium.Marker(
+            location=[centro.y, centro.x],  # Coordenadas del centroide en orden latitud, longitud
+            icon=folium.DivIcon(
+                html=f'<div style="font-size: 12px; color: black; font-weight: bold;">{nombre_departamento}</div>'
+            )
+        ).add_to(m)
 
     # Guardar el mapa en un archivo HTML temporal
     map_html = BytesIO()
