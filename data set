@@ -1,0 +1,24 @@
+import pandas as pd
+
+# Ruta del archivo CSV original
+archivo_original = "2023-Gasto-Mensual.csv"  # Cambia esto a la ruta real de tu archivo
+
+# Cargar el archivo completo en un DataFrame
+df = pd.read_csv(archivo_original)
+
+# Filtrar y agrupar los datos por el nombre del departamento ejecutor y sumar los montos devengados
+# Cambia 'DEPARTAMENTO_EJECUTORA_NOMBRE' y 'MONTO_DEVENGADO' por los nombres exactos de las columnas en tu archivo
+if 'DEPARTAMENTO_EJECUTORA_NOMBRE' in df.columns and 'MONTO_DEVENGADO' in df.columns:
+    # Agrupar por departamento y sumar los montos devengados
+    gasto_por_departamento = df.groupby('DEPARTAMENTO_EJECUTORA_NOMBRE')['MONTO_DEVENGADO'].sum()
+
+    # Convertir el resultado a DataFrame para exportarlo fácilmente
+    resultado_df = gasto_por_departamento.reset_index()
+    resultado_df.columns = ['Departamento', 'Gasto_Total']
+
+    # Guardar el resultado en un archivo CSV
+    resultado_df.to_csv("gasto_total_por_departamento.csv", index=False)
+
+    print("Archivo 'gasto_total_por_departamento.csv' generado exitosamente.")
+else:
+    print("Error: El archivo no contiene las columnas 'DEPARTAMENTO_EJECUTORA_NOMBRE' o 'MONTO_DEVENGADO'.")
