@@ -1,9 +1,8 @@
 import streamlit as st
+import pandas as pd
 import folium
-from folium import GeoJson
 import json
 from io import BytesIO
-import random
 
 # Configuración de la página con título y emoji de mundo
 st.set_page_config(page_title="Mapa del Gasto Público en Perú 🌍", page_icon="🌍", layout="wide")
@@ -37,7 +36,6 @@ departamento_colores = {
     "UCAYALI": "#F08080"
 }
 
-
 # Cargar archivo GeoJSON
 @st.cache_data
 def load_geojson():
@@ -45,17 +43,14 @@ def load_geojson():
         geojson_data = json.load(f)
     return geojson_data
 
+# Cargar datos de gasto desde el CSV filtrado
+@st.cache_data
+def load_gasto_data():
+    return pd.read_csv("gasto_total_por_departamento.csv")
 
 # Crear el mapa interactivo
 def create_map(geojson_data, selected_departamento=None):
     m = folium.Map(location=[-9.19, -75.015], zoom_start=5)
-
-    # Función para manejar el clic en un departamento
-    def handle_click(feature):
-        departamento = feature['properties']['NOMBDEP']
-        gasto_mensual = [random.randint(500000, 2000000) for _ in range(12)]
-        st.session_state["departamento"] = departamento
-        st.session_state["gasto_mensual"] = gasto_mensual
 
     # Añadir cada departamento al mapa
     for feature in geojson_data["features"]:
@@ -63,12 +58,8 @@ def create_map(geojson_data, selected_departamento=None):
         color = departamento_colores.get(dep_name, "#808080")
 
         # Cambiar el contorno si es el departamento seleccionado
-        if dep_name == selected_departamento:
-            line_color = "yellow"  # Contorno resaltado para el departamento seleccionado
-            weight = 4
-        else:
-            line_color = "black"
-            weight = 2
+        line_color = "yellow" if dep_name == selected_departamento else "black"
+        weight = 4 if dep_name == selected_departamento else 2
 
         folium.GeoJson(
             feature,
@@ -89,48 +80,47 @@ def create_map(geojson_data, selected_departamento=None):
     map_html.seek(0)
     return map_html
 
-
 # Título de la aplicación
 st.title("Mapa Interactivo del Gasto Público en Perú - Año 2023 🌍")
 
 # Columnas de la interfaz
 col1, col2 = st.columns([1, 2], gap="medium")
 
-# Columna Izquierda: Información de Gasto
+# Cargar datos de gasto
+gasto_data = load_gasto_data()
+
+# Columna Izquierda: Menú de selección y gasto
 with col1:
     st.header("Información de Gasto Público 📊")
 
-    # Mostrar los datos al hacer clic
-    if "departamento" in st.session_state:
-        departamento = st.session_state["departamento"]
-        gasto_mensual = st.session_state["gasto_mensual"]
+    # Crear un selectbox para seleccionar un departamento
+    departamento = st.selectbox("Seleccione un departamento", gasto_data['Departamento'].unique())
 
-        st.subheader(f"Departamento: {departamento}")
-        st.markdown("<hr style='border:1px solid #ddd;'>", unsafe_allow_html=True)
+    # Obtener el gasto total del departamento seleccionado
+    gasto_total = gasto_data[gasto_data['Departamento'] == departamento]['Gasto_Total'].values[0]
 
-        st.write("### Gasto Mensual (S/):")
-        for mes, gasto in enumerate(gasto_mensual, start=1):
-            st.write(f"**Mes {mes}**: S/ {gasto:,.2f}")
-
-        total_gasto = sum(gasto_mensual)
-        st.markdown("<hr style='border:1px solid #ddd;'>", unsafe_allow_html=True)
-        st.write(f"**Gasto Total Anual:** S/ {total_gasto:,.2f}")
-    else:
-        st.write("Seleccione una región en el mapa para ver el detalle del gasto público.")
+    # Mostrar el gasto total con formato atractivo
+    st.subheader(f"Departamento: {departamento}")
+    st.markdown("<hr style='border:1px solid #ddd;'>", unsafe_allow_html=True)
+    st.markdown(
+        f"<div style='font-size: 24px; font-weight: bold; color: #333;'>Gasto Total Anual:</div>"
+        f"<div style='font-size: 32px; font-weight: bold; color: #FF6347;'>S/ {gasto_total:,.2f}</div>",
+        unsafe_allow_html=True
+    )
 
 # Columna Derecha: Mapa Interactivo
 with col2:
     geojson_data = load_geojson()
-    map_html = create_map(geojson_data, selected_departamento=st.session_state.get("departamento"))
+    map_html = create_map(geojson_data, selected_departamento=departamento)
     st.components.v1.html(map_html.getvalue(), height=600)
 
 # Barra lateral con información adicional
 st.sidebar.header("Información Adicional")
 st.sidebar.markdown("""
     Este mapa muestra el gasto público por departamento en Perú para el año 2023.
-    <br>Haga clic en cualquier región para obtener detalles específicos de cada área.
+    <br>Seleccione cualquier departamento en el menú para obtener detalles específicos.
     <br><br>Este proyecto fue desarrollado como una herramienta de visualización de datos para el análisis regional.
     """, unsafe_allow_html=True)
 
 # Notificación para el usuario
-st.sidebar.info("Haga clic en un departamento en el mapa para ver su gasto mensual.")
+st.sidebar.info("Seleccione un departamento para ver su gasto anual.")
