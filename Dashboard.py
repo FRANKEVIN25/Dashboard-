@@ -10,7 +10,6 @@ st.title("Mapa Interactivo del Gasto Público en Perú - Año 2023 🌍")
 # Cargar datos de gasto
 gasto_data = load_gasto_data()
 
-
 # Función para cargar datos de gasto mensual optimizado
 @st.cache_data
 def load_gasto_mensual():
@@ -19,7 +18,6 @@ def load_gasto_mensual():
     df['Mes'] = df['Mes'].astype(int)
     df['Gasto_Mensual'] = df['Gasto_Mensual'].astype(float)
     return df
-
 
 gasto_mensual_data = load_gasto_mensual()
 
@@ -55,7 +53,7 @@ with col1:
         mes, gasto = row['Mes'], row['Gasto_Mensual']
         st.write(f"- Mes {mes}: S/ {gasto:,.2f}")
 
-    # Crear el gráfico de barras de gasto mensual
+    # Crear el gráfico de barras de gasto mensual con colores diferentes por cada mes
     st.subheader("Gasto Mensual")
 
     # Verificar si hay datos para mostrar
@@ -67,7 +65,9 @@ with col1:
             y=alt.Y('Gasto_Mensual:Q',
                     title='Gasto (S/)',
                     scale=alt.Scale(zero=True)),
-            color=alt.value('#4B8BBE'),  # Color fijo para las barras
+            color=alt.Color('Mes:O',  # Asignar un color único por mes
+                           scale=alt.Scale(scheme='category20'),  # Usar una escala de colores
+                           legend=None),  # No mostrar leyenda de color
             tooltip=[
                 alt.Tooltip('Mes:O', title='Mes'),
                 alt.Tooltip('Gasto_Mensual:Q', title='Gasto', format=',.2f')
@@ -90,7 +90,7 @@ with col2:
 
 # Información adicional en la barra lateral
 st.sidebar.header("Información Adicional")
-st.sidebar.markdown("""
+st.sidebar.markdown(""" 
     Este mapa muestra el gasto público por departamento en Perú para el año 2023.
     <br>Seleccione cualquier departamento en el menú para obtener detalles específicos.
     <br><br>Este proyecto fue desarrollado como una herramienta de visualización de datos para el análisis regional.
