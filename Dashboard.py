@@ -48,7 +48,7 @@ with col1:
     datos_departamento = datos_departamento.sort_values('Mes')
 
     # Mostrar los gastos mensuales en texto
-    st.write("**Gastos Mensuales por Mes:**")
+    st.write("*Gastos Mensuales por Mes:*")
     for i, row in datos_departamento.iterrows():
         mes, gasto = row['Mes'], row['Gasto_Mensual']
         st.write(f"- Mes {mes}: S/ {gasto:,.2f}")
@@ -63,8 +63,7 @@ with col1:
                     title='Mes',
                     sort=None),  # Mantener el orden natural de los meses
             y=alt.Y('Gasto_Mensual:Q',
-                    title='Gasto (S/)',
-                    scale=alt.Scale(zero=True)),
+                    title='Gasto (S/)'),
             color=alt.Color('Mes:O',  # Asignar un color único por mes
                            scale=alt.Scale(scheme='category20'),  # Usar una escala de colores
                            legend=None),  # No mostrar leyenda de color
@@ -88,12 +87,16 @@ with col2:
     map_html = create_map(geojson_data, gasto_data, selected_departamento=departamento)
     st.components.v1.html(map_html.getvalue(), height=600)
 
-# Información adicional en la barra lateral
+# Información adicional en la barra lateral con fondo celeste
 st.sidebar.header("Información Adicional")
-st.sidebar.markdown(""" 
-    Este mapa muestra el gasto público por departamento en Perú para el año 2023.
-    <br>Seleccione cualquier departamento en el menú para obtener detalles específicos.
-    <br><br>Este proyecto fue desarrollado como una herramienta de visualización de datos para el análisis regional.
+
+# Usar HTML para agregar fondo celeste y estilo con letras resaltadas
+st.sidebar.markdown("""
+    <div style='background-color: #81D4FA; padding: 20px; border-radius: 8px; color: white;'>
+        <p style='font-size: 18px; font-weight: bold;'>Este mapa muestra el gasto público por departamento en Perú para el año 2023.</p>
+        <p style='font-size: 16px;'>Seleccione cualquier departamento en el menú para obtener detalles específicos.</p>
+        <p style='font-size: 16px;'>Este proyecto fue desarrollado como una herramienta de visualización de datos para el análisis regional.</p>
+    </div>
     """, unsafe_allow_html=True)
 
 st.sidebar.info("Seleccione un departamento para ver su gasto mensual y anual.")
