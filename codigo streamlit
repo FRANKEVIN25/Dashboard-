@@ -1,0 +1,119 @@
+import streamlit as st
+import pandas as pd
+import altair as alt
+from functions import load_geojson, load_gasto_data, create_map
+
+# Configuración de la página de Streamlit
+st.set_page_config(page_title="Mapa del Gasto Público en Perú 🌍", page_icon="🌍", layout="wide")
+
+# Barra superior como menú en la esquina derecha
+menu = st.sidebar.selectbox(
+    "Navegación", 
+    ["Inicio", "Gasto Público", "Mapa Interactivo", "Acerca de"], 
+    help="Selecciona una opción para navegar por la aplicación"
+)
+
+# Condiciones para las opciones del menú
+if menu == "Inicio":
+    st.title("Bienvenido a la Plataforma de Gasto Público en Perú 🌍")
+    st.write("Selecciona una opción del menú para explorar más contenido.")
+    st.image("imagen/iaaaaa.jpg", use_column_width=True)  # Una imagen de bienvenida (opcional)
+
+    # Información adicional
+    st.markdown("---")
+    st.header("Descripción del Proyecto 📝")
+    st.write("""
+        Esta aplicación permite explorar datos del gasto público en Perú de manera interactiva. 
+        Con herramientas visuales como mapas y gráficos, se puede analizar la distribución del presupuesto a nivel nacional y por departamento.
+    """)
+
+elif menu == "Gasto Público":
+    st.title("Información del Gasto Público 📊")
+
+    # Cargar datos de gasto
+    gasto_data = load_gasto_data()
+
+    # Selector de departamento
+    departamento = st.selectbox("Seleccione un departamento", gasto_data['Departamento'].unique())
+    gasto_total = gasto_data[gasto_data['Departamento'] == departamento]['Gasto_Total'].values[0]
+
+    # Dividir en columnas para mostrar el gasto total y el mapa juntos
+    col1, col2 = st.columns([1, 2])  # Ancho relativo de columnas
+
+    # Columna 1: Texto del gasto total
+    with col1:
+        st.subheader(f"Departamento: {departamento}")
+        st.markdown("<hr style='border:1px solid #ddd;'>", unsafe_allow_html=True)
+        st.markdown(
+            f"<div style='font-size: 24px; font-weight: bold; color: #333;'>Gasto Total Anual:</div>"
+            f"<div style='font-size: 32px; font-weight: bold; color: #FF6347;'>S/ {gasto_total:,.2f}</div>",
+            unsafe_allow_html=True
+        )
+
+    # Columna 2: Mapa interactivo
+    with col2:
+        st.subheader("Mapa Interactivo del Gasto Público 🗺️")
+        geojson_data = load_geojson()  # Cargar datos de geojson
+        map_html = create_map(geojson_data, gasto_data)  # Crear mapa interactivo
+        st.components.v1.html(map_html.getvalue(), height=600)  # Mostrar el mapa
+
+    # Cargar datos mensuales
+    @st.cache_data
+    def load_gasto_mensual():
+        df = pd.read_csv("gasto_mensual_por_departamento.csv")
+        df['Mes'] = df['Mes'].astype(int)
+        df['Gasto_Mensual'] = df['Gasto_Mensual'].astype(float)
+        return df
+
+    gasto_mensual_data = load_gasto_mensual()
+    gasto_mensual_data = gasto_mensual_data[gasto_mensual_data['Mes'] != 0]
+    datos_departamento = gasto_mensual_data[gasto_mensual_data['Departamento'] == departamento].sort_values('Mes')
+
+    # Mostrar datos mensuales
+    st.subheader("Gasto Mensual")
+    st.write("*Gastos Mensuales por Mes:*")
+    for i, row in datos_departamento.iterrows():
+        mes, gasto = row['Mes'], row['Gasto_Mensual']
+        st.write(f"- Mes {mes}: S/ {gasto:,.2f}")
+
+    # Gráfico de barras de gasto mensual
+    if not datos_departamento.empty:
+        chart = alt.Chart(datos_departamento).mark_bar().encode(
+            x=alt.X('Mes:O', title='Mes', sort=None),
+            y=alt.Y('Gasto_Mensual:Q', title='Gasto (S/)'),
+            color=alt.Color('Mes:O', scale=alt.Scale(scheme='category20'), legend=None),
+            tooltip=[alt.Tooltip('Mes:O', title='Mes'), alt.Tooltip('Gasto_Mensual:Q', title='Gasto', format=',.2f')]
+        ).properties(width='container', height=300, title=f"Gasto Mensual - {departamento}")
+        st.altair_chart(chart, use_container_width=True)
+    else:
+        st.warning("No hay datos disponibles para mostrar el gráfico.")
+
+elif menu == "Mapa Interactivo":
+    st.title("Mapa Interactivo del Gasto Público 🗺️")
+
+    # Cargar datos de gasto y geojson
+    gasto_data = load_gasto_data()
+    geojson_data = load_geojson()
+
+    # Crear mapa interactivo
+    map_html = create_map(geojson_data, gasto_data)
+    st.components.v1.html(map_html.getvalue(), height=600)
+
+elif menu == "Acerca de":
+    st.title("Acerca de esta Aplicación 📚")
+    st.write("""
+        Esta aplicación fue desarrollada para visualizar el gasto público en Perú. 
+        Permite explorar información detallada por departamento y mes, además de mostrar gráficos y mapas interactivos.
+    """)
+    st.markdown("""
+        ### Contacto:
+        - **Autor:** Tu Nombre
+        - **Correo:** tuemail@example.com
+    """)
+
+    # Información adicional
+    st.markdown("---")
+    st.header("Más Información")
+    st.write("""
+        Para mayor detalle, puede comunicarse con el autor o visitar el repositorio oficial del proyecto.
+    """)
