@@ -64,8 +64,7 @@ def create_map(geojson_data, gastos, selected_departamento=None):
                 'opacity': 1,
                 'color': line_color,
                 'fillOpacity': 0.5
-            },#gasto_data[gasto_data['Departamento'] == departamento]['Gasto_Total'].values[0]
-            #tooltip=dep_name,                               # Aparecer el nombre al pasar el cursor
+            },#gasto_data[gasto_data['Departamento'] == departamento]['Gasto_Total'].values[0]                      
             highlight_function=lambda x: {'weight': 3, 'color': 'blue'},    # Resaltar color al pasar el cursor
             name="Departamento",                            # Nombre de capa en el mapa
         ).add_to(m)                                         # Añadir cada caractaerísica nueva a la variable "m"
