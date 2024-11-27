@@ -2,21 +2,22 @@ import streamlit as st
 import pandas as pd
 import altair as alt
 from functions import load_geojson, load_gasto_data, create_map
+from streamlit_option_menu import option_menu
 
 class PublicSpendingApp:
     def __init__(self):
         self._configure_page()
         self._load_data()
-        self._setup_horizontal_navbar()
+        self._setup_navigation_menu()
 
     def _configure_page(self):
         """Configuración inicial de la página de Streamlit"""
         st.set_page_config(
-            page_title="Mapa del Gasto Público en Perú 🌍", 
-            page_icon="🌍", 
+            page_title="Mapa del Gasto Público en Perú 🌍",
+            page_icon="🌍",
             layout="wide"
         )
-        st.title("Mapa Interactivo del Gasto Público en Perú - Año 2023 🌍")
+        st.title("Visualización del Gasto Público en Perú - Año 2023 🌍")
 
     def _load_data(self):
         """Cargar datos de gasto"""
@@ -41,53 +42,57 @@ class PublicSpendingApp:
             st.error(f"Error al cargar datos de gasto mensual: {e}")
             return pd.DataFrame()
 
-    def _setup_horizontal_navbar(self):
-        """Configurar navbar horizontal personalizado"""
-        pages = [
-            "Mapa de Perú", 
-            "Gráficas de Gasto", 
-            "Análisis Detallado", 
-            "Comparativo", 
-            "Información"
-        ]
-        
-        # Inicializar el estado de la página si no existe
-        if 'current_page' not in st.session_state:
-            st.session_state.current_page = "Mapa de Perú"
+    def _setup_navigation_menu(self):
+        """Configurar menú de navegación horizontal"""
+        selected = option_menu(
+            menu_title=None,
+            options=["Página principal", "Gráficas de Gasto", "Comparativo", "Información"],
+            icons=["house", "bar-chart", "filter", "info-circle"],
+            menu_icon="cast",
+            default_index=0,
+            orientation="horizontal",
+            styles={"container": {"max-width": "300%", "padding": "10px 0"}}
+        )
 
-        # Usar st.tabs para navegación
-        tabs = st.tabs(pages)
-        
-        # Encontrar el índice de la página actual
-        current_page_index = pages.index(st.session_state.current_page)
-        
-        # Renderizar el contenido de la página actual
-        with tabs[current_page_index]:
-            # Llamar al método de renderizado de página
-            self._render_page()
-
-    def _render_page(self):
-        """Renderizar la página seleccionada"""
-        pages = {
-            "Mapa de Perú": self._render_map_page,
-            "Gráficas de Gasto": self._render_graphs_page,
-            "Análisis Detallado": self._render_analysis_page,
-            "Comparativo": self._render_comparative_page,
-            "Información": self._render_info_page
-        }
-        pages[st.session_state.current_page]()
+        # Mostrar contenido según la opción seleccionada
+        if selected == "Página principal":
+            self._render_map_page()
+        elif selected == "Gráficas de Gasto":
+            self._render_graphs_page()
+        elif selected == "Comparativo":
+            self._render_comparative_page()
+        elif selected == "Información":
+            self._render_info_page()
 
     def _render_map_page(self):
-        """Renderizar página principal con mapa"""
+        """Renderizar página principal con mapa interactivo"""
+        st.header("Mapa Interactivo del Gasto Público en Perú")
         if self.gasto_data.empty:
             st.warning("No se pudieron cargar los datos de gasto.")
+            return
+        try:
+            geojson_data = load_geojson()
+            map_html = create_map(
+                geojson_data,
+                self.gasto_data,
+                selected_departamento=st.session_state.get('selected_departamento', None)
+            )
+            st.components.v1.html(map_html.getvalue(), height=600)
+        except Exception as e:
+            st.error(f"Error al cargar el mapa interactivo: {e}")
+
+    def _render_graphs_page(self):
+        """Renderizar gráficos de gastos"""
+        st.header("Gráficas Comparativas de Gasto Público")
+        if self.gasto_data.empty or self.gasto_mensual_data.empty:
+            st.warning("No hay datos disponibles para graficar.")
             return
 
         col1, col2 = st.columns([1, 2], gap="medium")
         with col1:
             self._render_department_selector()
         with col2:
-            self._render_interactive_map()
+            st.write("Seleccione un departamento en el menú de la izquierda para ver gráficos.")
 
     def _render_department_selector(self):
         """Selector de departamento con información detallada"""
@@ -96,7 +101,7 @@ class PublicSpendingApp:
             return
 
         departamento = st.selectbox(
-            "Seleccione un departamento", 
+            "Seleccione un departamento",
             self.gasto_data['Departamento'].unique()
         )
         try:
@@ -136,26 +141,6 @@ class PublicSpendingApp:
             tooltip=[alt.Tooltip('Mes:O'), alt.Tooltip('Gasto_Mensual:Q', format=',.2f')]
         ).properties(title=f"Gasto Mensual - {departamento}")
         st.altair_chart(chart, use_container_width=True)
-
-    def _render_interactive_map(self):
-        """Renderizar mapa interactivo"""
-        try:
-            geojson_data = load_geojson()
-            map_html = create_map(
-                geojson_data, 
-                self.gasto_data, 
-                selected_departamento=st.session_state.get('selected_departamento', None)
-            )
-            st.components.v1.html(map_html.getvalue(), height=600)
-        except Exception as e:
-            st.error(f"Error al cargar el mapa interactivo: {e}")
-
-    #TRABAJANDO PARA IMPRIMIR LOS GRAFICOS
-    def _render_graphs_page(self):
-        st.header("Gráficas Comparativas de Gasto Público")
-    
-    def _render_analysis_page(self):
-        st.header("Análisis Detallado de Gasto Público")
 
     def _render_comparative_page(self):
         st.header("Comparativo de Gasto Público")
