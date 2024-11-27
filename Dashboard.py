@@ -43,35 +43,6 @@ class PublicSpendingApp:
 
     def _setup_horizontal_navbar(self):
         """Configurar navbar horizontal personalizado"""
-        st.markdown("""
-        <style>
-        .horizontal-navbar {
-            display: flex;
-            justify-content: center;
-            background-color: #f1f1f1;
-            padding: 10px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-        }
-        .horizontal-navbar button {
-            margin: 0 10px;
-            padding: 10px 20px;
-            background-color: #e7e7e7;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-        }
-        .horizontal-navbar button:hover {
-            background-color: #ddd;
-        }
-        .horizontal-navbar button.active {
-            background-color: #4CAF50;
-            color: white;
-        }
-        </style>
-        """, unsafe_allow_html=True)
-
         pages = [
             "Mapa de Perú", 
             "Gráficas de Gasto", 
@@ -80,15 +51,20 @@ class PublicSpendingApp:
             "Información"
         ]
         
+        # Inicializar el estado de la página si no existe
         if 'current_page' not in st.session_state:
             st.session_state.current_page = "Mapa de Perú"
 
-        cols = st.columns(len(pages))
-        for i, page in enumerate(pages):
-            if cols[i].button(page, key=f"nav_{page}"):
-                st.session_state.current_page = page
-
-        self._render_page()
+        # Usar st.tabs para navegación
+        tabs = st.tabs(pages)
+        
+        # Encontrar el índice de la página actual
+        current_page_index = pages.index(st.session_state.current_page)
+        
+        # Renderizar el contenido de la página actual
+        with tabs[current_page_index]:
+            # Llamar al método de renderizado de página
+            self._render_page()
 
     def _render_page(self):
         """Renderizar la página seleccionada"""
@@ -174,9 +150,10 @@ class PublicSpendingApp:
         except Exception as e:
             st.error(f"Error al cargar el mapa interactivo: {e}")
 
+    #TRABAJANDO PARA IMPRIMIR LOS GRAFICOS
     def _render_graphs_page(self):
         st.header("Gráficas Comparativas de Gasto Público")
-
+    
     def _render_analysis_page(self):
         st.header("Análisis Detallado de Gasto Público")
 
@@ -185,11 +162,7 @@ class PublicSpendingApp:
 
     def _render_info_page(self):
         st.header("Información del Proyecto")
-        st.markdown("**Proyecto de Visualización del Gasto Público en Perú**")
-
-def main():
-    PublicSpendingApp()
+        st.markdown("**Proyecto de Visualización del Gasto Público en el Perú 2023.**")
 
 if __name__ == "__main__":
-    main()
-
+    PublicSpendingApp()
