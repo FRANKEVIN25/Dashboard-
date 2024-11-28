@@ -4,6 +4,7 @@ import altair as alt
 from functions import load_geojson, load_gasto_data, create_map
 from streamlit_option_menu import option_menu
 
+
 class PublicSpendingApp:
     def __init__(self):
         self._configure_page()
@@ -88,11 +89,18 @@ class PublicSpendingApp:
             st.warning("No hay datos disponibles para graficar.")
             return
 
+        # Crear columnas para selector y mensaje
         col1, col2 = st.columns([1, 2], gap="medium")
         with col1:
             self._render_department_selector()
         with col2:
+            # Mensaje de instrucciones
             st.write("Seleccione un departamento en el menú de la izquierda para ver gráficos.")
+
+            # Obtener departamento seleccionado y mostrar gráfico de barras
+            selected_departamento = st.session_state.get('selected_departamento', None)
+            if selected_departamento:
+                self._render_monthly_bar_chart(selected_departamento)
 
     def _render_department_selector(self):
         """Selector de departamento con información detallada"""
@@ -104,14 +112,14 @@ class PublicSpendingApp:
             "Seleccione un departamento",
             self.gasto_data['Departamento'].unique()
         )
+        st.session_state['selected_departamento'] = departamento  # Guardar en el estado de la sesión
         try:
             gasto_total = self.gasto_data[
                 self.gasto_data['Departamento'] == departamento
-            ]['Gasto_Total'].values[0]
+                ]['Gasto_Total'].values[0]
             st.subheader(f"Departamento: {departamento}")
-            st.markdown(f"**Gasto Total Anual:** S/ {gasto_total:,.2f}")
+            st.markdown(f"*Gasto Total Anual:* S/ {gasto_total:,.2f}")
             self._render_monthly_expenses(departamento)
-            self._render_monthly_bar_chart(departamento)
         except Exception as e:
             st.error(f"Error al mostrar datos: {e}")
 
@@ -119,35 +127,56 @@ class PublicSpendingApp:
         """Mostrar gastos mensuales"""
         datos_departamento = self.gasto_mensual_data[
             self.gasto_mensual_data['Departamento'] == departamento
-        ].sort_values('Mes')
+            ].sort_values('Mes')
         if datos_departamento.empty:
             st.warning(f"No hay datos mensuales para {departamento}")
             return
-        st.write("**Gastos Mensuales:**")
+        st.write("*Gastos Mensuales:*")
         for _, row in datos_departamento.iterrows():
             st.write(f"- Mes {row['Mes']}: S/ {row['Gasto_Mensual']:,.2f}")
 
     def _render_monthly_bar_chart(self, departamento):
-        """Crear gráfico de barras de gasto mensual"""
+        """Crear gráfico de barras de gasto mensual con colores sólidos"""
         datos_departamento = self.gasto_mensual_data[
             self.gasto_mensual_data['Departamento'] == departamento
         ].sort_values('Mes')
+
         if datos_departamento.empty:
             st.warning("No hay datos disponibles para el gráfico.")
             return
+
+        # Crear el gráfico con colores sólidos
         chart = alt.Chart(datos_departamento).mark_bar().encode(
             x=alt.X('Mes:O', title='Mes'),
             y=alt.Y('Gasto_Mensual:Q', title='Gasto (S/)'),
-            tooltip=[alt.Tooltip('Mes:O'), alt.Tooltip('Gasto_Mensual:Q', format=',.2f')]
-        ).properties(title=f"Gasto Mensual - {departamento}")
+            color=alt.Color('Mes:O',
+                            scale=alt.Scale(
+                                range=['red', 'green', 'blue', 'orange', 'purple',
+                                       'brown', 'pink', 'yellow', 'cyan', 'magenta',
+                                       'gray', 'black']
+                            ),
+                            title='Mes'),
+            tooltip=[alt.Tooltip('Mes:O', title='Mes'),
+                     alt.Tooltip('Gasto_Mensual:Q', format=',.2f', title='Gasto (S/)')]
+        ).properties(
+            title=f"Gasto Mensual - {departamento}",
+            height=500  # Ajustar la altura del gráfico
+        ).configure_title(
+            fontSize=18, anchor='start', color='gray'
+        )
+
         st.altair_chart(chart, use_container_width=True)
+
+        # Agregar espacio adicional después del gráfico
+        st.markdown("<br>", unsafe_allow_html=True)  # Espacio adicional debajo del gráfico
 
     def _render_comparative_page(self):
         st.header("Comparativo de Gasto Público")
 
     def _render_info_page(self):
         st.header("Información del Proyecto")
-        st.markdown("**Proyecto de Visualización del Gasto Público en el Perú 2023.**")
+        st.markdown("*Proyecto de Visualización del Gasto Público en el Perú 2023.*")
+
 
 if __name__ == "__main__":
     PublicSpendingApp()
