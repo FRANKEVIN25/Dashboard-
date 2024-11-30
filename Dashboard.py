@@ -5,13 +5,23 @@ from functions import load_geojson, load_gasto_data, create_map
 from streamlit_option_menu import option_menu
 
 
-class PublicSpendingApp:
-    def __init__(self):
-        self._configure_page()
-        self._load_data()
-        self._setup_navigation_menu()
+def colocar_css(nombre):                        # Leer archivo css
+    file = open(nombre, "r", encoding="utf-8")  # Abrir con encodificación utf-8
+    lines = ""
+    for line in file:                           # Copiar las líneas
+        lines = lines + line
+    st.markdown(lines, unsafe_allow_html=True)  # Colocar las líneas como css y cerrar archivo
+    file.close()
 
-    def _configure_page(self):
+
+class PublicSpendingApp:
+    def __init__(self):                         # Inicialización
+        self._configure_page()                  # Configurar página
+        self._load_data()                       # Carga de datos
+        self._setup_navigation_menu()           # Instalación del menú de navegación
+
+    @staticmethod                               # Modificación aquí, pycharm me lo sugirió ** ELIMINAR COMENTARIO **
+    def _configure_page():
         """Configuración inicial de la página de Streamlit"""
         st.set_page_config(
             page_title="Mapa del Gasto Público en Perú 🌍",
@@ -22,10 +32,10 @@ class PublicSpendingApp:
 
     def _load_data(self):
         """Cargar datos de gasto"""
-        try:
+        try:                                    # Intentar cargar datos de gastos
             self.gasto_data = load_gasto_data()
             self.gasto_mensual_data = self._load_gasto_mensual()
-        except Exception as e:
+        except Exception as e:                  # De lo contrario, mensaje de error
             st.error(f"Error al cargar los datos: {e}")
             self.gasto_data = pd.DataFrame()
             self.gasto_mensual_data = pd.DataFrame()
@@ -34,12 +44,12 @@ class PublicSpendingApp:
     @st.cache_data
     def _load_gasto_mensual():
         """Cargar datos de gasto mensual optimizado"""
-        try:
-            df = pd.read_csv("gasto_mensual_por_departamento.csv")
-            df['Mes'] = df['Mes'].astype(int)
-            df['Gasto_Mensual'] = df['Gasto_Mensual'].astype(float)
-            return df[df['Mes'] != 0]
-        except Exception as e:
+        try:                                                        # Intentar cargar datos
+            df = pd.read_csv("gasto_mensual_por_departamento.csv")      # Abrir csv
+            df['Mes'] = df['Mes'].astype(int)                           # Conversión a entero
+            df['Gasto_Mensual'] = df['Gasto_Mensual'].astype(float)     # Conversión a flotante
+            return df[df['Mes'] != 0]                                   # Devolver valores diferentes a cero
+        except Exception as e:                                      # De lo contrario, mensaje de error
             st.error(f"Error al cargar datos de gasto mensual: {e}")
             return pd.DataFrame()
 
@@ -55,8 +65,7 @@ class PublicSpendingApp:
             styles={"container": {"max-width": "300%", "padding": "10px 0"}}
         )
 
-        # Mostrar contenido según la opción seleccionada
-        if selected == "Página principal":
+        if selected == "Página principal":                          # Mostrar contenido según la opción seleccionada
             self._render_map_page()
         elif selected == "Gráficas de Gasto":
             self._render_graphs_page()
@@ -67,32 +76,31 @@ class PublicSpendingApp:
 
     def _render_map_page(self):
         """Renderizar página principal con mapa interactivo"""
-        st.header("Mapa Interactivo del Gasto Público en Perú")
-        if self.gasto_data.empty:
+        st.header("Mapa Interactivo del Gasto Público en Perú")     # Cabecera
+        if self.gasto_data.empty:                                   # Verificar que los datos no estén vacíos
             st.warning("No se pudieron cargar los datos de gasto.")
             return
-        try:
-            geojson_data = load_geojson()
-            map_html = create_map(
+        try:                                                        # Intentar crear mapa
+            geojson_data = load_geojson()                               # Cargar archivo de mapa
+            map_html = create_map(                                      # Crear mapa interactivo
                 geojson_data,
                 self.gasto_data,
                 selected_departamento=st.session_state.get('selected_departamento', None)
             )
             st.components.v1.html(map_html.getvalue(), height=600)
-        except Exception as e:
+        except Exception as e:                                      # O mandar mensaje de error
             st.error(f"Error al cargar el mapa interactivo: {e}")
 
     def _render_graphs_page(self):
         """Renderizar gráficos de gastos"""
-        st.header("Gráficas Comparativas de Gasto Público")
-        if self.gasto_data.empty or self.gasto_mensual_data.empty:
+        st.header("Gráficas Comparativas de Gasto Público")         # Cabecera
+        if self.gasto_data.empty or self.gasto_mensual_data.empty:  # Verificar que los datos no estén vacíos
             st.warning("No hay datos disponibles para graficar.")
             return
 
-        # Crear columnas para selector y mensaje
-        col1, col2 = st.columns([1, 2], gap="medium")
+        col1, col2 = st.columns([1, 2], gap="medium")               # Crear columnas
         with col1:
-            self._render_department_selector()
+            self._render_department_selector()                      # Selector de departamentos
         with col2:
             # Mensaje de instrucciones
             st.write("Seleccione un departamento en el menú de la izquierda para ver gráficos.")
@@ -104,46 +112,45 @@ class PublicSpendingApp:
 
     def _render_department_selector(self):
         """Selector de departamento con información detallada"""
-        if self.gasto_data.empty or 'Departamento' not in self.gasto_data.columns:
+        if self.gasto_data.empty or 'Departamento' not in self.gasto_data.columns:  # Verificar que no esté vacío
             st.warning("No hay datos de departamentos disponibles.")
             return
 
-        departamento = st.selectbox(
+        departamento = st.selectbox(                                # Selector de departamentos
             "Seleccione un departamento",
             self.gasto_data['Departamento'].unique()
         )
-        st.session_state['selected_departamento'] = departamento  # Guardar en el estado de la sesión
+        st.session_state['selected_departamento'] = departamento    # Guardar en el estado de la sesión
         try:
             gasto_total = self.gasto_data[
-                self.gasto_data['Departamento'] == departamento
-            ]['Gasto_Total'].values[0]
-            st.subheader(f"Departamento: {departamento}")
+                self.gasto_data['Departamento'] == departamento         # Utilizar archivo de gastos anuales
+                ]['Gasto_Total'].values[0]
+            st.subheader(f"Departamento: {departamento}")               # Títulos y cabeceras
             st.markdown(f"*Gasto Total Anual:* S/ {gasto_total:,.2f}")
-            self._render_monthly_expenses(departamento)
-        except Exception as e:
+            self._render_monthly_expenses(departamento)                 # Renderizar gastos mensuales
+        except Exception as e:                                      # En caso de error mandar advertencia
             st.error(f"Error al mostrar datos: {e}")
 
     def _render_monthly_expenses(self, departamento):
         """Mostrar gastos mensuales"""
-        datos_departamento = self.gasto_mensual_data[
+        datos_departamento = self.gasto_mensual_data[               # Utilizar archivo de gastos mensuales
             self.gasto_mensual_data['Departamento'] == departamento
-        ].sort_values('Mes')
-        if datos_departamento.empty:
+            ].sort_values('Mes')
+        if datos_departamento.empty:                                # Advertir en caso de que estén vacíos
             st.warning(f"No hay datos mensuales para {departamento}")
             return
         st.write("*Gastos Mensuales:*")
-        for _, row in datos_departamento.iterrows():
+        for _, row in datos_departamento.iterrows():                # Escribir los datos que contienen los gastos
             st.write(f"- Mes {row['Mes']}: S/ {row['Gasto_Mensual']:,.2f}")
 
     def _render_monthly_bar_chart(self, departamento):
-        """Crear gráfico de barras y gráfico de pastel para gasto mensual con colores sólidos"""
-        # Filtrar los datos del departamento
-        datos_departamento = self.gasto_mensual_data[
+        """Crear gráfico de barras de gasto mensual con colores sólidos"""
+        datos_departamento = self.gasto_mensual_data[               # Utilizar archivo de gastos mensuales
             self.gasto_mensual_data['Departamento'] == departamento
         ].sort_values('Mes')
 
-        if datos_departamento.empty:
-            st.warning("No hay datos disponibles para los gráficos.")
+        if datos_departamento.empty:                                # Advertir si los datos están vacíos
+            st.warning("No hay datos disponibles para el gráfico.")
             return
 
         # Crear el gráfico de barras con colores sólidos
@@ -195,6 +202,7 @@ class PublicSpendingApp:
         # Espacio adicional después de los gráficos
         st.markdown("<br>", unsafe_allow_html=True)
 
+
     def _render_comparative_page(self):
         """Renderizar la página comparativa de gasto público"""
         st.header("Comparativo de Gasto Público")
@@ -211,6 +219,7 @@ class PublicSpendingApp:
         elif comparativo_tipo == "Gasto Mensual":
             # Comparativo de gasto mensual entre departamentos
             self._render_monthly_comparison()
+
 
     def _render_total_comparison(self):
         """Mostrar gráfico comparativo de gasto total anual"""
@@ -233,6 +242,7 @@ class PublicSpendingApp:
         )
 
         st.altair_chart(bar_chart, use_container_width=True)
+
 
     def _render_monthly_comparison(self):
         """Mostrar gráfico comparativo de gasto mensual entre departamentos"""
@@ -277,149 +287,18 @@ class PublicSpendingApp:
 
         st.altair_chart(bar_chart, use_container_width=True)
 
-    def _render_info_page(self):
-        # Custom CSS for enhanced styling
-        st.markdown("""
-        <style>
-        .info-header {
-            background-color: #5564eb; 
-            color: white; 
-            padding: 30px; 
-            border-radius: 15px; 
-            text-align: center;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        }
-        .info-header h1 {
-            margin-bottom: 10px;
-            font-size: 2.5em;
-        }
-        .info-header p {
-            font-size: 1.2em;
-            opacity: 0.9;
-        }
-        .section-title {
-            color: #5564eb;
-            border-bottom: 2px solid #1f4e79;
-            padding-bottom: 10px;
-            margin-top: 30px;
-        }
-        .author-card {
-            background-color: #1f4e79;
-            color: white
-            border-radius: 10px;
-            padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-        </style>
-        """, unsafe_allow_html=True)
+    @staticmethod                           # SUGERENCIA DE PYCHARM **ELIMINAR COMENTARIO**
+    def _render_info_page():
+        colocar_css("style.css")            # Leer archivo CSS de estilos
 
-        # Main Header
-        st.markdown("""
-        <div class="info-header">
-            <h1>Información del Proyecto</h1>
-            <p>Proyecto de Visualización del Gasto Público en el Perú 2023</p>
-        </div>
-        """, unsafe_allow_html=True)
-
-        # Authors Section
-        st.markdown("<h2 class='section-title'>👥 Autores del Proyecto</h2>", unsafe_allow_html=True)
-
-        # Create columns for author cards
-        col1, col2 = st.columns(2)
+        col1, col2 = st.columns(2)          # Crear columnas de los autores
 
         with col1:
-            st.markdown("""
-            <div class="author-card">
-                <h3>Frank Kevin Jauregui Bendezu</h3>
-                <p><i>Investigador Principal</i></p>
-                <p>Responsable de la recopilación y análisis de datos de gasto público.</p>
-            </div>
-            """, unsafe_allow_html=True)
-
-            st.markdown("""
-            <div class="author-card">
-                <h3>John Kenneth Karita</h3>
-                <p><i>Analista de Datos</i></p>
-                <p>Especialista en visualización y procesamiento de información estadística.</p>
-            </div>
-            """, unsafe_allow_html=True)
-
+            colocar_css("autores_1.css")    # Archivo de autores 1
         with col2:
-            st.markdown("""
-            <div class="author-card">
-                <h3>Jesus Anselmo Morales Alvarado</h3>
-                <p><i>Coordinador de Investigación</i></p>
-                <p>Supervisión metodológica y estructuración del proyecto.</p>
-            </div>
-            """, unsafe_allow_html=True)
+            colocar_css("autores_2.css")    # Archivo de autores 2
 
-            st.markdown("""
-            <div class="author-card">
-                <h3>Jheyson Smith Anselmo Castañeda Tello</h3>
-                <p><i>Desarrollador de Visualizaciones</i></p>
-                <p>Implementación de herramientas interactivas y diseño de interfaz.</p>
-            </div>
-            """, unsafe_allow_html=True)
-
-        # Existing Sections with Improved Formatting
-        st.markdown("<h2 class='section-title'>📘 ¿Qué son los gastos públicos?</h2>", unsafe_allow_html=True)
-        st.write("""
-        Los **gastos públicos** son las inversiones y gastos realizados por el gobierno para satisfacer 
-        las necesidades de la sociedad, como salud, educación, infraestructura, seguridad, entre otros.
-        """)
-
-        st.markdown("<h2 class='section-title'>🇵🇪 Gasto Público en el Perú</h2>", unsafe_allow_html=True)
-        st.markdown("""
-        En el Perú, el gasto público se realiza a través de **tres niveles de gobierno**:
-        - 🏛️ **Gobierno Nacional:** Responsable de políticas nacionales y grandes proyectos.
-        - 🌍 **Gobiernos Regionales:** Encargados de la administración de servicios como salud y educación en su ámbito territorial.
-        - 🏘️ **Gobiernos Locales:** Gestionan obras y servicios básicos en los municipios.
-        """)
-
-        st.markdown("<h2 class='section-title'>✨ Enfoques del Presupuesto 2023</h2>", unsafe_allow_html=True)
-        st.markdown("""
-        Para el año 2023, el gasto público en el Perú se ha enfocado principalmente en sectores clave:
-        - 🎓 **Educación:** Incremento en infraestructura educativa y acceso a tecnologías.
-        - 🏥 **Salud:** Fortalecimiento del sistema de salud post-pandemia.
-        - 🚧 **Infraestructura:** Construcción de carreteras, obras de agua potable y proyectos de energía.
-        """)
-
-        st.markdown("<h2 class='section-title'>📊 Distribución Presupuestal 2023</h2>", unsafe_allow_html=True)
-        st.markdown("""
-        Según el Ministerio de Economía y Finanzas (MEF):
-        - 📘 **Educación:** Representa aproximadamente el **17%** del presupuesto total.
-        - 🏥 **Salud:** Cerca del **11%** del gasto total.
-        - 🚧 **Infraestructura:** Un **12%** dirigido a mejorar la conectividad.
-        """)
-
-        st.markdown("<h2 class='section-title'>💰 Fuentes de Financiamiento</h2>", unsafe_allow_html=True)
-        st.write("""
-        Los gastos públicos se financian principalmente mediante:
-        - 🏦 **Impuestos:** Como el IGV e Impuesto a la Renta.
-        - ⛏️ **Canon y Regalías:** Por explotación de minerales y recursos naturales.
-        - 💳 **Deuda Pública:** Emisión de bonos y préstamos internacionales.
-        """)
-
-        st.markdown("<h2 class='section-title'>🚩 Desafíos Actuales</h2>", unsafe_allow_html=True)
-        st.markdown("""
-        - ⚙️ **Ejecución Presupuestal:** Dificultades de gobiernos locales para ejecutar el presupuesto asignado.
-        - ❌ **Corrupción:** Desvío de recursos públicos.
-        - 🌍 **Desigualdad Regional:** Brechas de inversión entre regiones.
-        """)
-
-        # Footer with Information Sources
-        st.markdown("""
-        <hr style="border:1px solid #ccc; margin-top: 30px;">
-        <div style="text-align:center; margin-top: 20px;">
-            <h3>🌐 Fuentes de Información</h3>
-            <p>
-                <a href="https://www.mef.gob.pe" target="_blank" style="margin: 0 10px;">Ministerio de Economía y Finanzas</a> | 
-                <a href="https://www.mef.gob.pe/es/presupuesto-publico" target="_blank" style="margin: 0 10px;">Presupuesto Público del Perú</a> | 
-                <a href="https://www.inei.gob.pe" target="_blank" style="margin: 0 10px;">INEI: Estadísticas del Gasto Público</a>
-            </p>
-        </div>
-        """, unsafe_allow_html=True)
+        colocar_css("info.css")             # Colocar información adicional del proyecto
 
 
 if __name__ == "__main__":

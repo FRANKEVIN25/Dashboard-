@@ -1,0 +1,41 @@
+<style>
+.info-header {
+    background-color: #1f4e79;
+    color: white;
+    padding: 30px;
+    border-radius: 15px;
+    text-align: center;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+.info-header h1 {
+    margin-bottom: 10px;
+    font-size: 2.5em;
+}
+.info-header p {
+    font-size: 1.2em;
+    opacity: 0.9;
+}
+.section-title {
+    color: #1f4e79;
+    border-bottom: 2px solid #1f4e79;
+    padding-bottom: 10px;
+    margin-top: 30px;
+}
+.author-card {
+    background-color: #f4f4f4;
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+</style>
+
+
+<div class="info-header">
+    <h1>Información del Proyecto</h1>
+    <p>Proyecto de Visualización del Gasto Público en el Perú 2023</p>
+</div>
+
+
+<h2 class='section-title'>👥 Autores del Proyecto</h2>
+

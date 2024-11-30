@@ -4,42 +4,31 @@ import streamlit as st
 import pandas as pd
 import folium
 
+
 class PublicSpendingMapUtilities:
     def __init__(self):
         self.departamento_colores = self._setup_departamento_colors()
         self.departamento_coordenadas = self._setup_departamento_coordinates()
 
-    def _setup_departamento_colors(self):
+    @staticmethod
+    def _setup_departamento_colors():
         """Definir un diccionario de colores para departamentos"""
-        return {
-            "AMAZONAS": "#FF6347", "ANCASH": "#32CD32", "APURIMAC": "#1E90FF",
-            "AREQUIPA": "#FFD700", "AYACUCHO": "#8A2BE2", "CAJAMARCA": "#FF4500",
-            "CALLAO": "#20B2AA", "CUSCO": "#D2691E", "HUANCAVELICA": "#ADFF2F",
-            "HUANUCO": "#FF1493", "ICA": "#B8860B", "JUNIN": "#A52A2A",
-            "LA LIBERTAD": "#A9A9A9", "LAMBAYEQUE": "#7FFF00", "LIMA": "#800000",
-            "LORETO": "#9ACD32", "MADRE DE DIOS": "#4B0082", "MOQUEGUA": "#8B0000",
-            "PASCO": "#2E8B57", "PIURA": "#B0C4DE", "PUNO": "#FF8C00",
-            "SAN MARTIN": "#E0FFFF", "TACNA": "#00CED1", "TUMBES": "#FF00FF",
-            "UCAYALI": "#F08080"
-        }
+        file = open("colores.csv", "r")     # Abrir el archivo de colores
+        diccionario = {}                    # Diccionario vacío
+        for line in file:                   # Leer cada línea
+            line = line.split(",")          # Eliminar comas y añadir al diccionario
+            diccionario[line[0]] = line[1].split("\n")[0]
+        return diccionario                  # Retornar diccionario
 
-    def _setup_departamento_coordinates(self):
+    @staticmethod
+    def _setup_departamento_coordinates():
         """Definir coordenadas para cada departamento"""
-        return {
-            "AMAZONAS": [-5.25, -78.257], "ANCASH": [-9.108, -77.7],
-            "APURIMAC": [-13.9, -73.0], "AREQUIPA": [-15.8, -72.2],
-            "AYACUCHO": [-14, -74.223], "CAJAMARCA": [-6.6, -78.7],
-            "CUSCO": [-13.530, -71.6], "HUANCAVELICA": [-12.773, -75.2],
-            "HUANUCO": [-9.5, -76.242], "ICA": [-14, -75.752],
-            "JUNIN": [-11.332, -75.202], "LA LIBERTAD": [-7.8, -78.7],
-            "LAMBAYEQUE": [-6.2, -79.929], "LIMA": [-11.6, -76.8],
-            "LORETO": [-4.047, -75], "MADRE DE DIOS": [-11.8, -70.5],
-            "MOQUEGUA": [-16.7, -71.0], "PASCO": [-10.1, -75.210],
-            "PIURA": [-4.9, -80.5], "PUNO": [-14.4, -70.3],
-            "SAN MARTIN": [-6.519, -76.756], "TACNA": [-17.5, -70.4],
-            "TUMBES": [-3.566, -80.7], "UCAYALI": [-9.7, -73.5],
-            "CALLAO": [-12.045, -77.135]
-        }
+        file = open("coordenadas.csv", "r")  # Abrir el archivo de coordenadas
+        diccionario = {}                    # Diccionario vacío
+        for line in file:                   # Leer cada línea
+            line = line.split(",")          # Eliminar comas y añadir al diccionario
+            diccionario[line[0]] = [float(line[1]), float(line[2].split("\n")[0])]
+        return diccionario                  # Retornar diccionario
 
     @staticmethod
     @st.cache_data
@@ -54,7 +43,8 @@ class PublicSpendingMapUtilities:
         """Cargar datos de gasto con caché"""
         return pd.read_csv(path)
 
-    def _format_large_number(self, number):
+    @staticmethod
+    def _format_large_number(number):
         """Formatear números grandes de manera legible"""
         if number == 0:
             return "0"
@@ -115,15 +105,19 @@ class PublicSpendingMapUtilities:
                 )
             ).add_to(map_obj)
 
+
 def load_geojson():
     """Función de compatibilidad para la app principal"""
     utils = PublicSpendingMapUtilities()
     return utils.load_geojson()
 
+
 def load_gasto_data():
     """Función de compatibilidad para la app principal"""
     utils = PublicSpendingMapUtilities()
+
     return utils.load_gasto_data()
+
 
 def create_map(geojson_data, gastos, selected_departamento=None):
     """Función de compatibilidad para la app principal"""
