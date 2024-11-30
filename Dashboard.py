@@ -173,10 +173,149 @@ class PublicSpendingApp:
     def _render_comparative_page(self):
         st.header("Comparativo de Gasto Público")
 
-    def _render_info_page(self):
-        st.header("Información del Proyecto")
-        st.markdown("*Proyecto de Visualización del Gasto Público en el Perú 2023.*")
 
+    def _render_info_page(self):
+        # Custom CSS for enhanced styling
+        st.markdown("""
+        <style>
+        .info-header {
+            background-color: #1f4e79; 
+            color: white; 
+            padding: 30px; 
+            border-radius: 15px; 
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .info-header h1 {
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+        .info-header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+        .section-title {
+            color: #1f4e79;
+            border-bottom: 2px solid #1f4e79;
+            padding-bottom: 10px;
+            margin-top: 30px;
+        }
+        .author-card {
+            background-color: #f4f4f4;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        </style>
+        """, unsafe_allow_html=True)
+
+        # Main Header
+        st.markdown("""
+        <div class="info-header">
+            <h1>Información del Proyecto</h1>
+            <p>Proyecto de Visualización del Gasto Público en el Perú 2023</p>
+        </div>
+        """, unsafe_allow_html=True)
+
+        # Authors Section
+        st.markdown("<h2 class='section-title'>👥 Autores del Proyecto</h2>", unsafe_allow_html=True)
+        
+        # Create columns for author cards
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            st.markdown("""
+            <div class="author-card">
+                <h3>Frank Kevin Jauregui Bendezu</h3>
+                <p><i>Investigador Principal</i></p>
+                <p>Responsable de la recopilación y análisis de datos de gasto público.</p>
+            </div>
+            """, unsafe_allow_html=True)
+            
+            st.markdown("""
+            <div class="author-card">
+                <h3>John Kenneth Karita</h3>
+                <p><i>Analista de Datos</i></p>
+                <p>Especialista en visualización y procesamiento de información estadística.</p>
+            </div>
+            """, unsafe_allow_html=True)
+
+        with col2:
+            st.markdown("""
+            <div class="author-card">
+                <h3>Jesus Anselmo Morales Alvarado</h3>
+                <p><i>Coordinador de Investigación</i></p>
+                <p>Supervisión metodológica y estructuración del proyecto.</p>
+            </div>
+            """, unsafe_allow_html=True)
+            
+            st.markdown("""
+            <div class="author-card">
+                <h3>Jheyson Smith Anselmo Castañeda Tello</h3>
+                <p><i>Desarrollador de Visualizaciones</i></p>
+                <p>Implementación de herramientas interactivas y diseño de interfaz.</p>
+            </div>
+            """, unsafe_allow_html=True)
+
+        # Existing Sections with Improved Formatting
+        st.markdown("<h2 class='section-title'>📘 ¿Qué son los gastos públicos?</h2>", unsafe_allow_html=True)
+        st.write("""
+        Los **gastos públicos** son las inversiones y gastos realizados por el gobierno para satisfacer 
+        las necesidades de la sociedad, como salud, educación, infraestructura, seguridad, entre otros.
+        """)
+
+        st.markdown("<h2 class='section-title'>🇵🇪 Gasto Público en el Perú</h2>", unsafe_allow_html=True)
+        st.markdown("""
+        En el Perú, el gasto público se realiza a través de **tres niveles de gobierno**:
+        - 🏛️ **Gobierno Nacional:** Responsable de políticas nacionales y grandes proyectos.
+        - 🌍 **Gobiernos Regionales:** Encargados de la administración de servicios como salud y educación en su ámbito territorial.
+        - 🏘️ **Gobiernos Locales:** Gestionan obras y servicios básicos en los municipios.
+        """)
+
+        st.markdown("<h2 class='section-title'>✨ Enfoques del Presupuesto 2023</h2>", unsafe_allow_html=True)
+        st.markdown("""
+        Para el año 2023, el gasto público en el Perú se ha enfocado principalmente en sectores clave:
+        - 🎓 **Educación:** Incremento en infraestructura educativa y acceso a tecnologías.
+        - 🏥 **Salud:** Fortalecimiento del sistema de salud post-pandemia.
+        - 🚧 **Infraestructura:** Construcción de carreteras, obras de agua potable y proyectos de energía.
+        """)
+
+        st.markdown("<h2 class='section-title'>📊 Distribución Presupuestal 2023</h2>", unsafe_allow_html=True)
+        st.markdown("""
+        Según el Ministerio de Economía y Finanzas (MEF):
+        - 📘 **Educación:** Representa aproximadamente el **17%** del presupuesto total.
+        - 🏥 **Salud:** Cerca del **11%** del gasto total.
+        - 🚧 **Infraestructura:** Un **12%** dirigido a mejorar la conectividad.
+        """)
+
+        st.markdown("<h2 class='section-title'>💰 Fuentes de Financiamiento</h2>", unsafe_allow_html=True)
+        st.write("""
+        Los gastos públicos se financian principalmente mediante:
+        - 🏦 **Impuestos:** Como el IGV e Impuesto a la Renta.
+        - ⛏️ **Canon y Regalías:** Por explotación de minerales y recursos naturales.
+        - 💳 **Deuda Pública:** Emisión de bonos y préstamos internacionales.
+        """)
+
+        st.markdown("<h2 class='section-title'>🚩 Desafíos Actuales</h2>", unsafe_allow_html=True)
+        st.markdown("""
+        - ⚙️ **Ejecución Presupuestal:** Dificultades de gobiernos locales para ejecutar el presupuesto asignado.
+        - ❌ **Corrupción:** Desvío de recursos públicos.
+        - 🌍 **Desigualdad Regional:** Brechas de inversión entre regiones.
+        """)
+
+        # Footer with Information Sources
+        st.markdown("""
+        <hr style="border:1px solid #ccc; margin-top: 30px;">
+        <div style="text-align:center; margin-top: 20px;">
+            <h3>🌐 Fuentes de Información</h3>
+            <p>
+                <a href="https://www.mef.gob.pe" target="_blank" style="margin: 0 10px;">Ministerio de Economía y Finanzas</a> | 
+                <a href="https://www.mef.gob.pe/es/presupuesto-publico" target="_blank" style="margin: 0 10px;">Presupuesto Público del Perú</a> | 
+                <a href="https://www.inei.gob.pe" target="_blank" style="margin: 0 10px;">INEI: Estadísticas del Gasto Público</a>
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
 
 if __name__ == "__main__":
     PublicSpendingApp()
