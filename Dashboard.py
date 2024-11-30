@@ -116,7 +116,7 @@ class PublicSpendingApp:
         try:
             gasto_total = self.gasto_data[
                 self.gasto_data['Departamento'] == departamento
-                ]['Gasto_Total'].values[0]
+            ]['Gasto_Total'].values[0]
             st.subheader(f"Departamento: {departamento}")
             st.markdown(f"*Gasto Total Anual:* S/ {gasto_total:,.2f}")
             self._render_monthly_expenses(departamento)
@@ -127,7 +127,7 @@ class PublicSpendingApp:
         """Mostrar gastos mensuales"""
         datos_departamento = self.gasto_mensual_data[
             self.gasto_mensual_data['Departamento'] == departamento
-            ].sort_values('Mes')
+        ].sort_values('Mes')
         if datos_departamento.empty:
             st.warning(f"No hay datos mensuales para {departamento}")
             return
@@ -136,24 +136,25 @@ class PublicSpendingApp:
             st.write(f"- Mes {row['Mes']}: S/ {row['Gasto_Mensual']:,.2f}")
 
     def _render_monthly_bar_chart(self, departamento):
-        """Crear gráfico de barras de gasto mensual con colores sólidos"""
+        """Crear gráfico de barras y gráfico de pastel para gasto mensual con colores sólidos"""
+        # Filtrar los datos del departamento
         datos_departamento = self.gasto_mensual_data[
             self.gasto_mensual_data['Departamento'] == departamento
         ].sort_values('Mes')
 
         if datos_departamento.empty:
-            st.warning("No hay datos disponibles para el gráfico.")
+            st.warning("No hay datos disponibles para los gráficos.")
             return
 
-        # Crear el gráfico con colores sólidos
-        chart = alt.Chart(datos_departamento).mark_bar().encode(
+        # Crear el gráfico de barras con colores sólidos
+        bar_chart = alt.Chart(datos_departamento).mark_bar().encode(
             x=alt.X('Mes:O', title='Mes'),
             y=alt.Y('Gasto_Mensual:Q', title='Gasto (S/)'),
             color=alt.Color('Mes:O',
                             scale=alt.Scale(
                                 range=['red', 'green', 'blue', 'orange', 'purple',
                                        'brown', 'pink', 'yellow', 'cyan', 'magenta',
-                                       'gray', 'black']
+                                       'gray', 'white']
                             ),
                             title='Mes'),
             tooltip=[alt.Tooltip('Mes:O', title='Mes'),
@@ -165,21 +166,123 @@ class PublicSpendingApp:
             fontSize=18, anchor='start', color='gray'
         )
 
-        st.altair_chart(chart, use_container_width=True)
+        # Mostrar el gráfico de barras
+        st.altair_chart(bar_chart, use_container_width=True)
 
-        # Agregar espacio adicional después del gráfico
-        st.markdown("<br>", unsafe_allow_html=True)  # Espacio adicional debajo del gráfico
+        # Crear el gráfico circular de pastel
+        pie_chart = alt.Chart(datos_departamento).mark_arc(stroke='black', strokeWidth=2).encode(
+            theta=alt.Theta('Gasto_Mensual:Q', title='Porcentaje de Gasto'),
+            color=alt.Color('Mes:O',
+                            scale=alt.Scale(
+                                range=['red', 'green', 'blue', 'orange', 'purple',
+                                       'brown', 'pink', 'yellow', 'cyan', 'magenta',
+                                       'gray', 'white']
+                            ),
+                            title='Mes'),
+            tooltip=[alt.Tooltip('Mes:O', title='Mes'),
+                     alt.Tooltip('Gasto_Mensual:Q', format=',.2f', title='Gasto (S/)')]
+        ).properties(
+            title=f"Distribución Porcentual del Gasto Mensual - {departamento}",
+            height=500,  # Altura del gráfico circular
+            width=500    # Ancho del gráfico circular
+        ).configure_title(
+            fontSize=16, anchor='middle', color='gray'
+        )
+
+        # Mostrar el gráfico de pastel
+        st.altair_chart(pie_chart, use_container_width=True)
+
+        # Espacio adicional después de los gráficos
+        st.markdown("<br>", unsafe_allow_html=True)
 
     def _render_comparative_page(self):
+        """Renderizar la página comparativa de gasto público"""
         st.header("Comparativo de Gasto Público")
 
+        # Selector de tipo de comparación
+        comparativo_tipo = st.radio(
+            "Seleccione el tipo de comparación:",
+            options=["Gasto Total Anual", "Gasto Mensual"]
+        )
+
+        if comparativo_tipo == "Gasto Total Anual":
+            # Comparativo de gasto total anual entre departamentos
+            self._render_total_comparison()
+        elif comparativo_tipo == "Gasto Mensual":
+            # Comparativo de gasto mensual entre departamentos
+            self._render_monthly_comparison()
+
+    def _render_total_comparison(self):
+        """Mostrar gráfico comparativo de gasto total anual"""
+        if self.gasto_data.empty:
+            st.warning("No hay datos disponibles para el gasto total anual.")
+            return
+
+        # Crear el gráfico de barras comparativo
+        bar_chart = alt.Chart(self.gasto_data).mark_bar().encode(
+            x=alt.X('Departamento:O', title='Departamento', sort='-y'),
+            y=alt.Y('Gasto_Total:Q', title='Gasto Total Anual (S/)'),
+            color=alt.Color('Departamento:O', scale=alt.Scale(scheme='inferno'), title='Departamento'),
+            tooltip=[alt.Tooltip('Departamento:O', title='Departamento'),
+                     alt.Tooltip('Gasto_Total:Q', format=',.2f', title='Gasto Total (S/)')]
+        ).properties(
+            title="Comparativo de Gasto Total Anual por Departamento",
+            height=500
+        ).configure_title(
+            fontSize=18, anchor='start', color='gray'
+        )
+
+        st.altair_chart(bar_chart, use_container_width=True)
+
+    def _render_monthly_comparison(self):
+        """Mostrar gráfico comparativo de gasto mensual entre departamentos"""
+        if self.gasto_mensual_data.empty:
+            st.warning("No hay datos disponibles para el gasto mensual.")
+            return
+
+        # Selector de mes
+        meses = sorted(self.gasto_mensual_data['Mes'].unique())
+        selected_mes = st.selectbox("Seleccione un mes para comparar:", options=["Todos"] + meses)
+
+        # Filtrar datos según el mes seleccionado
+        if selected_mes != "Todos":
+            datos_filtrados = self.gasto_mensual_data[
+                self.gasto_mensual_data['Mes'] == selected_mes
+                ]
+            titulo = f"Comparativo de Gasto Mensual por Departamento - Mes {selected_mes}"
+        else:
+            datos_filtrados = self.gasto_mensual_data
+            titulo = "Comparativo de Gasto Mensual por Departamento (Todos los Meses)"
+
+        if datos_filtrados.empty:
+            st.warning("No hay datos para la selección realizada.")
+            return
+
+        # Crear el gráfico de barras apilado o normal según la selección
+        bar_chart = alt.Chart(datos_filtrados).mark_bar().encode(
+            x=alt.X('Departamento:O', title='Departamento'),
+            y=alt.Y('Gasto_Mensual:Q', title='Gasto Mensual (S/)'),
+            color=alt.Color('Mes:O', scale=alt.Scale(scheme='inferno'), title='Mes' if selected_mes == "Todos" else None),
+            tooltip=[
+                alt.Tooltip('Departamento:O', title='Departamento'),
+                alt.Tooltip('Mes:O', title='Mes'),
+                alt.Tooltip('Gasto_Mensual:Q', format=',.2f', title='Gasto Mensual (S/)')
+            ]
+        ).properties(
+            title=titulo,
+            height=500
+        ).configure_title(
+            fontSize=18, anchor='start', color='gray'
+        )
+
+        st.altair_chart(bar_chart, use_container_width=True)
 
     def _render_info_page(self):
         # Custom CSS for enhanced styling
         st.markdown("""
         <style>
         .info-header {
-            background-color: #1f4e79; 
+            background-color: #5564eb; 
             color: white; 
             padding: 30px; 
             border-radius: 15px; 
@@ -195,13 +298,14 @@ class PublicSpendingApp:
             opacity: 0.9;
         }
         .section-title {
-            color: #1f4e79;
+            color: #5564eb;
             border-bottom: 2px solid #1f4e79;
             padding-bottom: 10px;
             margin-top: 30px;
         }
         .author-card {
-            background-color: #f4f4f4;
+            background-color: #1f4e79;
+            color: white
             border-radius: 10px;
             padding: 20px;
             margin-bottom: 20px;
@@ -220,10 +324,10 @@ class PublicSpendingApp:
 
         # Authors Section
         st.markdown("<h2 class='section-title'>👥 Autores del Proyecto</h2>", unsafe_allow_html=True)
-        
+
         # Create columns for author cards
         col1, col2 = st.columns(2)
-        
+
         with col1:
             st.markdown("""
             <div class="author-card">
@@ -232,7 +336,7 @@ class PublicSpendingApp:
                 <p>Responsable de la recopilación y análisis de datos de gasto público.</p>
             </div>
             """, unsafe_allow_html=True)
-            
+
             st.markdown("""
             <div class="author-card">
                 <h3>John Kenneth Karita</h3>
@@ -249,7 +353,7 @@ class PublicSpendingApp:
                 <p>Supervisión metodológica y estructuración del proyecto.</p>
             </div>
             """, unsafe_allow_html=True)
-            
+
             st.markdown("""
             <div class="author-card">
                 <h3>Jheyson Smith Anselmo Castañeda Tello</h3>
@@ -316,6 +420,7 @@ class PublicSpendingApp:
             </p>
         </div>
         """, unsafe_allow_html=True)
+
 
 if __name__ == "__main__":
     PublicSpendingApp()
