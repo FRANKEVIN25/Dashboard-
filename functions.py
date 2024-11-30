@@ -13,7 +13,7 @@ class PublicSpendingMapUtilities:
     @staticmethod
     def _setup_departamento_colors():
         """Definir un diccionario de colores para departamentos"""
-        file = open("colores.csv", "r")     # Abrir el archivo de colores
+        file = open("Other/colores.csv", "r")     # Abrir el archivo de colores
         diccionario = {}                    # Diccionario vacío
         for line in file:                   # Leer cada línea
             line = line.split(",")          # Eliminar comas y añadir al diccionario
@@ -23,7 +23,7 @@ class PublicSpendingMapUtilities:
     @staticmethod
     def _setup_departamento_coordinates():
         """Definir coordenadas para cada departamento"""
-        file = open("coordenadas.csv", "r")  # Abrir el archivo de coordenadas
+        file = open("Other/coordenadas.csv", "r")  # Abrir el archivo de coordenadas
         diccionario = {}                    # Diccionario vacío
         for line in file:                   # Leer cada línea
             line = line.split(",")          # Eliminar comas y añadir al diccionario
