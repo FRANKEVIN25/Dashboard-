@@ -17,12 +17,12 @@
 }
 .section-title {
     color: #1f4e79;
-    border-bottom: 2px solid #1f4e79;
+    border-bottom: 2px solid #0c6e57;
     padding-bottom: 10px;
     margin-top: 30px;
 }
 .author-card {
-    background-color: #f4f4f4;
+    background-color: #0c6e57;
     border-radius: 10px;
     padding: 20px;
     margin-bottom: 20px;
@@ -33,9 +33,8 @@
 
 <div class="info-header">
     <h1>Información del Proyecto</h1>
-    <p>Proyecto de Visualización del Gasto Público en el Perú 2023</p>
+    <p>Proyecto de Visualización del Gasto Público en el Perú 2012 - 2023</p>
 </div>
 
 
 <h2 class='section-title'>👥 Autores del Proyecto</h2>
-
