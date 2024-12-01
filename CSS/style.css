@@ -1,7 +1,7 @@
 <style>
 .info-header {
-    background-color: #1f4e79;
-    color: white;
+    background-color: #abe35c;
+    color: black;
     padding: 30px;
     border-radius: 15px;
     text-align: center;
@@ -9,6 +9,7 @@
 }
 .info-header h1 {
     margin-bottom: 10px;
+    color: black;
     font-size: 2.5em;
 }
 .info-header p {
@@ -17,16 +18,21 @@
 }
 .section-title {
     color: #1f4e79;
-    border-bottom: 2px solid #0c6e57;
+    border-bottom: 2px solid #abe35c;
     padding-bottom: 10px;
     margin-top: 30px;
 }
 .author-card {
-    background-color: #0c6e57;
+    background-color: #abe35c;
     border-radius: 10px;
     padding: 20px;
     margin-bottom: 20px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1)
+    color: black !important;
+}
+.author-card h3,
+.author-card p {
+    color: black
 }
 </style>
 
