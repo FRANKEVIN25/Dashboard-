@@ -18,12 +18,6 @@ for line in file:
     line = line.split(",")
     coordenadas[line[0]] = [float(line[1]), float(line[2].split("\n")[0])]
 
-file = open("Other/informacion_de_region", "r")
-informacion= {}
-for line in file:
-    line = line.split(",")
-    informacion[line[0]] = [float(line[1]), float(line[2].split("\n")[0])]
-
 # Cargar información de regiones
 def cargar_informacion_regiones():
     try:
