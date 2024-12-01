@@ -5,6 +5,7 @@ Se muestran los gastos públicos anuales y mensuales del año 2012 hasta el año
 
 # Cambios por hacerse
 - Subir los archivos utilizados en el procesamiento de datos
+- Eliminar mensajes de advertencia durante la muestra del mapa
 
 # Cambios - Iteración actual
 - Refactorización de los archivos python: Graphics, Map_loader y Dashboard
