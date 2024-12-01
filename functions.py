@@ -32,14 +32,14 @@ class PublicSpendingMapUtilities:
 
     @staticmethod
     @st.cache_data
-    def load_geojson(path="peru_departamental_simple.geojson"):
+    def load_geojson(path="Other/peru_departamental_simple.geojson"):
         """Cargar archivo GeoJSON con caché"""
         with open(path, "r") as f:
             return json.load(f)
 
     @staticmethod
     @st.cache_data
-    def load_gasto_data(path="gasto_total_por_departamento.csv"):
+    def load_gasto_data(path="Other/gasto_total_por_departamento.csv"):
         """Cargar datos de gasto con caché"""
         return pd.read_csv(path)
 

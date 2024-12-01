@@ -1,6 +1,5 @@
 import streamlit as st
 import pandas as pd
-import altair as alt
 from functions import load_geojson, load_gasto_data, create_map
 from streamlit_option_menu import option_menu
 import Graphics
@@ -46,7 +45,7 @@ class PublicSpendingApp:
     def _load_gasto_mensual():
         """Cargar datos de gasto mensual optimizado"""
         try:                                                        # Intentar cargar datos
-            df = pd.read_csv("gasto_mensual_por_departamento.csv")      # Abrir csv
+            df = pd.read_csv("Other/gasto_mensual_por_departamento.csv")      # Abrir csv
             df['Mes'] = df['Mes'].astype(int)                           # Conversión a entero
             df['Gasto_Mensual'] = df['Gasto_Mensual'].astype(float)     # Conversión a flotante
             return df[df['Mes'] != 0]                                   # Devolver valores diferentes a cero
