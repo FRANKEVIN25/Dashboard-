@@ -9,8 +9,8 @@ def colocar_css(nombre):                        # Leer archivo css
     lines = ""
     for line in file:                           # Copiar las líneas
         lines = lines + line
-    st.markdown(lines, unsafe_allow_html=True)  # Colocar las líneas como css y cerrar archivo
-    file.close()
+    st.markdown(lines, unsafe_allow_html=True)  # Colocar las líneas como css
+    file.close()                                # Cerrar archivo
 
 
 class PublicSpendingApp:
@@ -22,25 +22,19 @@ class PublicSpendingApp:
     def _configure_page():
         """Configuración inicial de la página de Streamlit"""
         st.set_page_config(
-            page_title="Mapa del Gasto Público en Perú 🌍",
-            page_icon="🌍",
-            layout="wide"
+            page_title="Gasto público en el Perú 🌍", page_icon="🌍", layout="wide"
         )
-        st.title("Visualización del Gasto Público en el Perú del año 2012 - 2023 🌍")
+        st.title("Visualización del Gasto Público en el Perú (2012-2023) 🌍")
 
     def _setup_navigation_menu(self):
         """Configurar menú de navegación horizontal"""
         selected = option_menu(
-            menu_title=None,
-            options=["Página principal", "Gráficas de Gasto", "Comparativo", "Información"],
-            icons=["house", "bar-chart", "filter", "info-circle"],
-            menu_icon="cast",
-            default_index=0,
-            orientation="horizontal",
-            styles={"container": {"max-width": "300%", "padding": "10px 0"}}
+            menu_title=None, options=["Página principal", "Gráficas de Gasto", "Comparativo", "Información"],
+            icons=["house", "bar-chart", "filter", "info-circle"], menu_icon="cast", default_index=0,
+            orientation="horizontal", styles={"container": {"max-width": "300%", "padding": "10px 0"}}
         )
 
-        if selected == "Página principal":                          # Mostrar contenido según la opción seleccionada
+        if selected == "Página principal":              # Mostrar contenido según la opción seleccionada
             Map_loader.render_map()
         elif selected == "Gráficas de Gasto":
             Graphics.mostrar_gasto_mensual_region()
@@ -49,28 +43,25 @@ class PublicSpendingApp:
         elif selected == "Información":
             self._render_info_page()
 
-    def _render_comparative_page(self):
+    @staticmethod
+    def _render_comparative_page():
         """Renderizar la página comparativa de gasto público"""
-        st.header("Comparativo de Gasto Público")
+        st.header("Comparativo de Gasto Público")       # Colocar cabecera
 
-        # Selector de tipo de comparación
-        comparativo_tipo = st.radio(
+        comparativo_tipo = st.radio(                    # Seleccionar el tipo de comparación
             "Seleccione el tipo de comparación:",
-            options=["Gasto Total Anual", "Gasto Mensual"]
-        )
+            options=["Gasto Total Anual", "Gasto Mensual"])
 
-        if comparativo_tipo == "Gasto Total Anual":
-            # Comparativo de gasto total anual entre departamentos
+        if comparativo_tipo == "Gasto Total Anual":     # Comparativo de gasto anual entre departamentos
             Graphics.mostrar_gasto_anual()
-        elif comparativo_tipo == "Gasto Mensual":
-            # Comparativo de gasto mensual entre departamentos
+        elif comparativo_tipo == "Gasto Mensual":       # Comparativo de gasto mensual entre departamentos
             Graphics.mostrar_gasto_mensual()
 
-    @staticmethod                           # SUGERENCIA DE PYCHARM **ELIMINAR COMENTARIO**
+    @staticmethod
     def _render_info_page():
         colocar_css("CSS/style.css")            # Leer archivo CSS de estilos
 
-        col1, col2 = st.columns(2)          # Crear columnas de los autores
+        col1, col2 = st.columns(2)              # Crear columnas de los autores
 
         with col1:
             colocar_css("CSS/autores_1.css")    # Archivo de autores 1
