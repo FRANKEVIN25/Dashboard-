@@ -3,14 +3,11 @@
 
 Se muestran los gastos públicos anuales y mensuales del año 2012 hasta el año 2023 fácilmente interpretables con ayuda de Streamlit y otras librerías... ver requirements.txt
 
-# Cambios por hacerse
-- Subir los archivos utilizados en el procesamiento de datos
-- Eliminar mensajes de advertencia durante la muestra del mapa
-
 # Cambios - Iteración actual
 - Refactorización de los archivos python: Graphics, Map_loader y Dashboard
 - Títulox y textos actualizados en los archivos python y CSS
 - Los datos visualizados coinciden con los archivos CSV
+- Subir los archivos utilizados en la obtención de datos
 
 # Cambios - Iteración anterior
 Gastos anuales y mensuales incluidos
