@@ -1,0 +1,12 @@
+https://fs.datosabiertos.mef.gob.pe/datastorefiles/2012-Gasto.csv
+https://fs.datosabiertos.mef.gob.pe/datastorefiles/2013-Gasto.csv
+https://fs.datosabiertos.mef.gob.pe/datastorefiles/2014-Gasto.csv
+https://fs.datosabiertos.mef.gob.pe/datastorefiles/2015-Gasto.csv
+https://fs.datosabiertos.mef.gob.pe/datastorefiles/2016-Gasto.csv
+https://fs.datosabiertos.mef.gob.pe/datastorefiles/2017-Gasto.csv
+https://fs.datosabiertos.mef.gob.pe/datastorefiles/2018-Gasto.csv
+https://fs.datosabiertos.mef.gob.pe/datastorefiles/2019-Gasto.csv
+https://fs.datosabiertos.mef.gob.pe/datastorefiles/2020-Gasto.csv
+https://fs.datosabiertos.mef.gob.pe/datastorefiles/2021-Gasto.csv
+https://fs.datosabiertos.mef.gob.pe/datastorefiles/2022-Gasto-Mensual.csv
+https://fs.datosabiertos.mef.gob.pe/datastorefiles/2023-Gasto-Mensual.csv
