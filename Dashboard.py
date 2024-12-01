@@ -1,8 +1,7 @@
 import streamlit as st
-import pandas as pd
-from functions import load_geojson, load_gasto_data, create_map
 from streamlit_option_menu import option_menu
 import Graphics
+import Map_loader
 
 
 def colocar_css(nombre):                        # Leer archivo css
@@ -17,7 +16,6 @@ def colocar_css(nombre):                        # Leer archivo css
 class PublicSpendingApp:
     def __init__(self):                         # Inicialización
         self._configure_page()                  # Configurar página
-        self._load_data()                       # Carga de datos
         self._setup_navigation_menu()           # Instalación del menú de navegación
 
     @staticmethod                               # Modificación aquí, pycharm me lo sugirió ** ELIMINAR COMENTARIO **
@@ -29,29 +27,6 @@ class PublicSpendingApp:
             layout="wide"
         )
         st.title("Visualización del Gasto Público en Perú - Año 2023 🌍")
-
-    def _load_data(self):
-        """Cargar datos de gasto"""
-        try:                                    # Intentar cargar datos de gastos
-            self.gasto_data = load_gasto_data()
-            self.gasto_mensual_data = self._load_gasto_mensual()
-        except Exception as e:                  # De lo contrario, mensaje de error
-            st.error(f"Error al cargar los datos: {e}")
-            self.gasto_data = pd.DataFrame()
-            self.gasto_mensual_data = pd.DataFrame()
-
-    @staticmethod
-    @st.cache_data
-    def _load_gasto_mensual():
-        """Cargar datos de gasto mensual optimizado"""
-        try:                                                        # Intentar cargar datos
-            df = pd.read_csv("Other/gasto_mensual_por_departamento.csv")      # Abrir csv
-            df['Mes'] = df['Mes'].astype(int)                           # Conversión a entero
-            df['Gasto_Mensual'] = df['Gasto_Mensual'].astype(float)     # Conversión a flotante
-            return df[df['Mes'] != 0]                                   # Devolver valores diferentes a cero
-        except Exception as e:                                      # De lo contrario, mensaje de error
-            st.error(f"Error al cargar datos de gasto mensual: {e}")
-            return pd.DataFrame()
 
     def _setup_navigation_menu(self):
         """Configurar menú de navegación horizontal"""
@@ -66,31 +41,13 @@ class PublicSpendingApp:
         )
 
         if selected == "Página principal":                          # Mostrar contenido según la opción seleccionada
-            self._render_map_page()
+            Map_loader.render_map()
         elif selected == "Gráficas de Gasto":
             Graphics.mostrar_gasto_mensual_region()
         elif selected == "Comparativo":
             self._render_comparative_page()
         elif selected == "Información":
             self._render_info_page()
-
-    def _render_map_page(self):
-        """Renderizar página principal con mapa interactivo"""
-        st.header("Mapa Interactivo del Gasto Público en Perú")     # Cabecera
-        if self.gasto_data.empty:                                   # Verificar que los datos no estén vacíos
-            st.warning("No se pudieron cargar los datos de gasto.")
-            return
-        try:                                                        # Intentar crear mapa
-            geojson_data = load_geojson()                               # Cargar archivo de mapa
-            map_html = create_map(                                      # Crear mapa interactivo
-                geojson_data,
-                self.gasto_data,
-                selected_departamento=st.session_state.get('selected_departamento', None)
-            )
-            st.components.v1.html(map_html.getvalue(), height=600)
-        except Exception as e:                                      # O mandar mensaje de error
-            st.error(f"Error al cargar el mapa interactivo: {e}")
-
 
     def _render_comparative_page(self):
         """Renderizar la página comparativa de gasto público"""
@@ -108,7 +65,6 @@ class PublicSpendingApp:
         elif comparativo_tipo == "Gasto Mensual":
             # Comparativo de gasto mensual entre departamentos
             Graphics.mostrar_gasto_mensual()
-
 
     @staticmethod                           # SUGERENCIA DE PYCHARM **ELIMINAR COMENTARIO**
     def _render_info_page():

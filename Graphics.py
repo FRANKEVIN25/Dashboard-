@@ -17,15 +17,20 @@ departamentos = ["AMAZONAS", "ANCASH", "APURIMAC", "AREQUIPA",
                  "SAN MARTIN", "TACNA", "TUMBES", "UCAYALI",
                  "CALLAO"]
 
-def mostrar_gasto_anual():
-    selected = option_menu(                                     # Barra de opciones, años
+
+def crear_cinta_de_opciones(opciones):
+    return option_menu(  # Barra de opciones, años
         menu_title=None,
-        options=[year for year in range(2012, 2024)],           # Opciones de los años, su selección devolverá un entero
+        options=opciones,  # Opciones de los años, su selección devolverá un entero
         menu_icon="cast",
         default_index=0,
         orientation="horizontal",
         styles={"container": {"max-width": "300%", "padding": "10px 0"}}
     )
+
+
+def mostrar_gasto_anual():
+    selected = crear_cinta_de_opciones([year for year in range(2012, 2024)])
 
     gasto_anual = pd.read_csv("Gasto-Anual\Gasto-Anual-2012-2023.csv")  # Abrir archivo, ordenar y seleccionar
     year = pd.concat([gasto_anual["Departamento"], gasto_anual["y_"+str(selected)]], axis=1)
@@ -63,24 +68,10 @@ def mostrar_gasto_anual():
 
 def mostrar_gasto_mensual():
     """Mostrar gráfico comparativo de gasto mensual entre departamentos"""
-    year_sel = option_menu(                                     # Barra de opciones, meses
-        menu_title=None,
-        options=[year for year in range(2012, 2024)],
-        menu_icon="cast",
-        default_index=0,
-        orientation="horizontal",
-        styles={"container": {"max-width": "300%", "padding": "10px 0"}}
-    )
+    year_sel = crear_cinta_de_opciones([year for year in range(2012, 2024)])
 
-    month_sel = option_menu(                                     # Barra de opciones, meses
-        menu_title=None,
-        options=["TODOS", "ENE", "FEB", "MAR", "ABR", "MAY", "JUN",     # Mes, opción seleccionado = string
-                 "JUL", "AGO", "SET", "OCT", "NOV", "DIC"],
-        menu_icon="cast",
-        default_index=0,
-        orientation="horizontal",
-        styles={"container": {"max-width": "300%", "padding": "10px 0"}}
-    )
+    month_sel = crear_cinta_de_opciones(["TODOS", "ENE", "FEB", "MAR", "ABR", "MAY", "JUN",
+                                         "JUL", "AGO", "SET", "OCT", "NOV", "DIC"])
 
     gasto_mensual = pd.read_csv("Gasto-Mensual/" + str(year_sel) + "-Gasto-Mensual-Por-Region.csv")
 
@@ -119,14 +110,7 @@ def mostrar_gasto_mensual():
 
 
 def mostrar_gasto_mensual_region():
-    year_sel = option_menu(  # Barra de opciones, meses
-        menu_title=None,
-        options=[year for year in range(2012, 2024)],
-        menu_icon="cast",
-        default_index=0,
-        orientation="horizontal",
-        styles={"container": {"max-width": "300%", "padding": "10px 0"}}
-    )
+    year_sel = crear_cinta_de_opciones([year for year in range(2012, 2024)])
 
     gasto_mensual = pd.read_csv("Gasto-Mensual/" + str(year_sel) + "-Gasto-Mensual-Por-Region.csv")
     col1, col2, col3= st.columns([1, 2, 2], gap="medium")  # Crear columnas
