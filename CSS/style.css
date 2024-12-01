@@ -1,6 +1,6 @@
 <style>
 .info-header {
-    background-color: #abe35c;
+    background-color: #ADD8E6;
     color: black;
     padding: 30px;
     border-radius: 15px;
@@ -18,12 +18,12 @@
 }
 .section-title {
     color: #1f4e79;
-    border-bottom: 2px solid #abe35c;
+    border-bottom: 2px solid #ADD8E6;
     padding-bottom: 10px;
     margin-top: 30px;
 }
 .author-card {
-    background-color: #abe35c;
+    background-color: #ADD8E6;
     border-radius: 10px;
     padding: 20px;
     margin-bottom: 20px;
