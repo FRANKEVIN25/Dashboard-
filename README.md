@@ -5,13 +5,13 @@ Se muestran los gastos públicos anuales y mensuales del año 2012 hasta el año
 
 # Cambios - Iteración actual
 Gastos anuales y mensuales incluidos
--Página principal: Selección de años encima del mapa
--Gráficas de gasto: Selección de años encima de los gráficos
--Comparativos: Selección de años y meses incluido
+- Página principal: Selección de años encima del mapa
+- Gráficas de gasto: Selección de años encima de los gráficos
+- Comparativos: Selección de años y meses incluido
 
 Refactorización extra
--Archivos python: Graphics, Map_loader y Dashboard
--Carpetas: CSS, Gasto-Anual, Gasto-Mensual, Other
+- Archivos python: Graphics, Map_loader y Dashboard
+- Carpetas: CSS, Gasto-Anual, Gasto-Mensual, Other
 
 # Cambios por hacerse
 - Verificar que los datos de los gráficos coincidan con los archivos CSV
