@@ -26,7 +26,7 @@ class PublicSpendingApp:
             page_icon="🌍",
             layout="wide"
         )
-        st.title("Visualización del Gasto Público en Perú - Año 2023 🌍")
+        st.title("Visualización del Gasto Público en el Perú del año 2012 - 2023 🌍")
 
     def _setup_navigation_menu(self):
         """Configurar menú de navegación horizontal"""
